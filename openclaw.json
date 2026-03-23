@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.3",
+    "lastTouchedAt": "2026-03-23T07:23:14.523Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-03-23T07:01:33.349Z",
+    "lastRunVersion": "2026.3.3",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "auth": {
+    "profiles": {
+      "minimax-cn:default": {
+        "provider": "minimax-cn",
+        "mode": "api_key"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "minimax-cn": {
+        "baseUrl": "https://api.minimaxi.com/anthropic",
+        "api": "anthropic-messages",
+        "authHeader": true,
+        "models": [
+          {
+            "id": "MiniMax-M2.5",
+            "name": "MiniMax M2.5",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0.3,
+              "output": 1.2,
+              "cacheRead": 0.03,
+              "cacheWrite": 0.12
+            },
+            "contextWindow": 200000,
+            "maxTokens": 100000
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "minimax-cn/MiniMax-M2.5"
+      },
+      "models": {
+        "minimax-cn/MiniMax-M2.5": {
+          "alias": "Minimax"
+        }
+      },
+      "workspace": "/root/.openclaw/workspace",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    }
+  },
+  "tools": {
+    "profile": "full",
+    "deny": [
+      "network-write",
+      "file-delete",
+      "payment"
+    ]
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "boot-md": {
+          "enabled": true
+        },
+        "command-logger": {
+          "enabled": true
+        },
+        "session-memory": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "channels": {
+    "dingtalk": {
+      "enabled": true,
+      "clientId": "ding39s9dvgbogfwmj1e",
+      "clientSecret": "gTcxjPNoa05wTRZDjA8UmCHu0nEXaTHHxZ7bJyyywzWSePs8a4EcqPpKWg-na8AY",
+      "robotCode": "ding39s9dvgbogfwmj1e",
+      "corpId": "ding51a3364a586669b9ee0f45d8e4f7c288",
+      "agentId": "4375412003",
+      "dmPolicy": "open",
+      "groupPolicy": "open",
+      "displayNameResolution": "disabled",
+      "messageType": "markdown"
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "a1c952118961a44d5a868b7043e4e736ed787f6ac8cde98b"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "contacts.add",
+        "calendar.add",
+        "reminders.add",
+        "sms.send"
+      ]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "dingtalk": {
+        "enabled": true
+      },
+      "openclaw-tavily": {
+        "enabled": true,
+	"config": {
+	  "apiKey": "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"
+	}
+      }
+    },
+    "installs": {
+      "dingtalk": {
+        "source": "npm",
+        "spec": "@soimy/dingtalk",
+        "installPath": "/root/.openclaw/extensions/dingtalk",
+        "version": "3.4.0",
+        "resolvedName": "@soimy/dingtalk",
+        "resolvedVersion": "3.4.0",
+        "resolvedSpec": "@soimy/dingtalk@3.4.0",
+        "integrity": "sha512-nk8SAob/TmMtGAaEzr9wJwrAZuENzMdDXQmYFgd/7lzMqnSa7FXkACtJdTZU3TH2qP2XojM/e9QUEiJ/bVWW+w==",
+        "shasum": "8a6225b8c4c8136816748baa9d851fcd27b5ad50",
+        "resolvedAt": "2026-03-23T06:58:37.364Z",
+        "installedAt": "2026-03-23T06:59:23.697Z"
+      },
+      "openclaw-tavily": {
+        "source": "npm",
+        "spec": "openclaw-tavily",
+        "installPath": "/root/.openclaw/extensions/openclaw-tavily",
+        "version": "0.2.1",
+        "resolvedName": "openclaw-tavily",
+        "resolvedVersion": "0.2.1",
+        "resolvedSpec": "openclaw-tavily@0.2.1",
+        "integrity": "sha512-Y/cYTiKWGjWm8TF0/0DGyB80Kuke1oJKEPcFvjmHutXSZSx42RmMqZ3I6kMz12hw1eoxJwQ8a0EJQAvq45KciQ==",
+        "shasum": "544d324879914108c50cfd801d7cff704069970d",
+        "resolvedAt": "2026-03-23T07:23:12.079Z",
+        "installedAt": "2026-03-23T07:23:13.969Z"
+      }
+    }
+  }
+}

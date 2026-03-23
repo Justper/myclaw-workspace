@@ -1,0 +1,25 @@
+# Logs and backups
+logs/
+*.log
+*.bak
+*.bak.*
+
+# Identity and devices (private)
+identity/
+devices/
+
+# Node modules
+extensions/*/node_modules/
+extensions/dingtalk/node_modules/
+extensions/openclaw-tavily/node_modules/
+
+# Canvas and temp
+.canvas/
+.DS_Store
+
+# Git
+.git/
+
+# OpenClaw data
+cron/
+agents/
