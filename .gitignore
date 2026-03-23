@@ -23,3 +23,7 @@ extensions/openclaw-tavily/node_modules/
 # OpenClaw data
 cron/
 agents/
+
+# 防止 submodule 问题
+**/.git
+**/.gitignore
