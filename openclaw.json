@@ -1,12 +1,12 @@
 {
   "meta": {
     "lastTouchedVersion": "2026.3.3",
-    "lastTouchedAt": "2026-03-23T07:23:14.523Z"
+    "lastTouchedAt": "2026-03-25T03:42:36.069Z"
   },
   "wizard": {
-    "lastRunAt": "2026-03-23T07:01:33.349Z",
+    "lastRunAt": "2026-03-25T03:42:36.054Z",
     "lastRunVersion": "2026.3.3",
-    "lastRunCommand": "onboard",
+    "lastRunCommand": "doctor",
     "lastRunMode": "local"
   },
   "auth": {
@@ -112,7 +112,10 @@
       "dmPolicy": "open",
       "groupPolicy": "open",
       "displayNameResolution": "disabled",
-      "messageType": "markdown"
+      "messageType": "markdown",
+      "allowFrom": [
+        "*"
+      ]
     }
   },
   "gateway": {
@@ -146,9 +149,9 @@
       },
       "openclaw-tavily": {
         "enabled": true,
-	"config": {
-	  "apiKey": "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"
-	}
+        "config": {
+          "apiKey": "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"
+        }
       }
     },
     "installs": {
