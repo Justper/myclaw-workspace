@@ -1,0 +1,20 @@
+{
+  "id": "7b8edeec-7b14-40b4-94a7-7435385b1354",
+  "enqueuedAt": 1775264649477,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "# ❄️ AI每日资讯（2026年4月4日）\n\n## 🔥 热门焦点\n\n**中国AI产业进入大规模发展阶段**\n- 2026中关村论坛\"人工智能+产业\"论坛指出：从大模型向智能体的转变成为最显著的技术趋势\n- 百度AI云副总裁尹大伟：智能体基础设施的成熟将使开发者能够快速构建交通、工业等场景的多模态应用\n\n**AI行业追求自我改进研究系统**\n- OpenAI、Anthropic、DeepMind等公司正加速研究工作流程自动化\n- 4月3日报道揭示行业自动化趋势与争议并存\n\n**前内部人士警告AI风险**\n- 前微软、OpenAI、Google DeepMind和白宫领导人向Business Insider表示：先进AI系统正变得更有能力、更自主、更难控制\n- 警告技术可能重塑劳动力市场和医疗保健，同时扩大网络和国家安全风险\n\n---\n\n## 🏢 企业动态\n\n**OpenAI首次收购媒体公司**\n- 收购TBPN（Technology Business Programming Network）\n- 获取数据集和AI时代塑造者的分发渠道，用于开发AI生成的新闻和分析产品\n\n**亚马逊加速布局机器人**\n- 收购人形机器人开发商Fauna Robotics\n- 收购物理AI和机器人开发商RIVR\n\n**AMD AI大会定档**\n- \"Advancing AI 2026\"将于7月22-23日在旧金山举行\n\n---\n\n## 🤖 机器人/AR\n\n**3月机器人10大进展**\n- NVIDIA GTC 2026展示全球机器人生态系统成果\n- 宝马在德国工厂部署Hexagon Robotics轮式人形机器人\n- 中国人形机器人制造商集体亮相\n\n**AR领域**\n- Snapchat推出AI Clips（3月24日）\n- Meta准备推出面向处方用户的AI眼镜\n- Zenni推动AI试戴，扩展零售AR试衣间\n\n---\n\n## 🛡️ 安全\n\n**AI改变网络攻击格局**\n- Fortinet专家：AI正在消除组织检测和响应威胁的时间窗口\n- 机器和AI驱动的身份引入数十亿新接入点需保护\n\n---\n\n*来源：Tavily AI新闻搜索*"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "# ❄️ AI每日资讯（2026年4月4日）\n\n## 🔥 热门焦点\n\n**中国AI产业进入大规模发展阶段**\n- 2026中关村论坛\"人工智能+产业\"论坛指出：从大模型向智能体的转变成为最显著的技术趋势\n- 百度AI云副总裁尹大伟：智能体基础设施的成熟将使开发者能够快速构建交通、工业等场景的多模态应用\n\n**AI行业追求自我改进研究系统**\n- OpenAI、Anthropic、DeepMind等公司正加速研究工作流程自动化\n- 4月3日报道揭示行业自动化趋势与争议并存\n\n**前内部人士警告AI风险**\n- 前微软、OpenAI、Google DeepMind和白宫领导人向Business Insider表示：先进AI系统正变得更有能力、更自主、更难控制\n- 警告技术可能重塑劳动力市场和医疗保健，同时扩大网络和国家安全风险\n\n---\n\n## 🏢 企业动态\n\n**OpenAI首次收购媒体公司**\n- 收购TBPN（Technology Business Programming Network）\n- 获取数据集和AI时代塑造者的分发渠道，用于开发AI生成的新闻和分析产品\n\n**亚马逊加速布局机器人**\n- 收购人形机器人开发商Fauna Robotics\n- 收购物理AI和机器人开发商RIVR\n\n**AMD AI大会定档**\n- \"Advancing AI 2026\"将于7月22-23日在旧金山举行\n\n---\n\n## 🤖 机器人/AR\n\n**3月机器人10大进展**\n- NVIDIA GTC 2026展示全球机器人生态系统成果\n- 宝马在德国工厂部署Hexagon Robotics轮式人形机器人\n- 中国人形机器人制造商集体亮相\n\n**AR领域**\n- Snapchat推出AI Clips（3月24日）\n- Meta准备推出面向处方用户的AI眼镜\n- Zenni推动AI试戴，扩展零售AR试衣间\n\n---\n\n## 🛡️ 安全\n\n**AI改变网络攻击格局**\n- Fortinet专家：AI正在消除组织检测和响应威胁的时间窗口\n- 机器和AI驱动的身份引入数十亿新接入点需保护\n\n---\n\n*来源：Tavily AI新闻搜索*"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1775264649824,
+  "lastError": "Request failed with status code 400"
+}
