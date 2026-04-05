@@ -1,0 +1,20 @@
+{
+  "id": "472694d3-187a-4bdd-a338-25c113d221b5",
+  "enqueuedAt": 1775350988515,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "# AI每日资讯（2026年4月5日）\n\n## 🚀 大模型动态\n\n**Anthropic 发布 Claude Mythos 5**\n- 首个被广泛认可的十万亿参数模型\n- 专为高风险环境设计，在网络安全、学术研究、复杂编码领域表现突出\n- 解决了长程规划中的\"分块跳过\"错误问题\n\n**Microsoft 推出 MAI 三大基础模型**\n- 4月2日发布 MAI-Transcribe-1、MAI-Voice-1、MAI-Image-2\n- 正式从OpenAI合作伙伴转变为直接竞争对手\n- 模型面向企业场景：客服代理、字幕生成、教育培训等\n\n**Google 更新 Gemma 4**\n- 转向Apache 2.0开源许可证\n- 推出TurboQuant压缩算法，可在减少6倍内存占用情况下保持前沿性能\n\n## 📰 行业聚焦\n\n**AI 电影制作爆发**\n- 印度宝莱坞成为全球最大AI电影制作基地\n- AI工作室 Galleri5 已制作AI生成的《摩诃婆罗多》系列\n\n**AI 投资分化**\n- 2025年有效的AI股票在2026年不再适用\n- 数据中心相关股票表现强劲，AI agent公司营收增长14%\n\n**能源挑战**\n- 国际能源署：数据中心用电量年增15%，到2030年超过整体能源增速4倍\n- Vertiv将推出针对Nvidia硬件的800伏电力系统\n\n## 🔧 工具新品\n\n- **Mistral AI**: Boxrol TTS - 多语言低延迟语音合成\n- **Anthropic**: Operon - 生物研究AI代理\n- **ElevenLabs**: ElevenMusic - AI音乐生成应用\n\n---\n*来源：Reuters, The Motley Fool, TechCrunch, devflokers*"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "# AI每日资讯（2026年4月5日）\n\n## 🚀 大模型动态\n\n**Anthropic 发布 Claude Mythos 5**\n- 首个被广泛认可的十万亿参数模型\n- 专为高风险环境设计，在网络安全、学术研究、复杂编码领域表现突出\n- 解决了长程规划中的\"分块跳过\"错误问题\n\n**Microsoft 推出 MAI 三大基础模型**\n- 4月2日发布 MAI-Transcribe-1、MAI-Voice-1、MAI-Image-2\n- 正式从OpenAI合作伙伴转变为直接竞争对手\n- 模型面向企业场景：客服代理、字幕生成、教育培训等\n\n**Google 更新 Gemma 4**\n- 转向Apache 2.0开源许可证\n- 推出TurboQuant压缩算法，可在减少6倍内存占用情况下保持前沿性能\n\n## 📰 行业聚焦\n\n**AI 电影制作爆发**\n- 印度宝莱坞成为全球最大AI电影制作基地\n- AI工作室 Galleri5 已制作AI生成的《摩诃婆罗多》系列\n\n**AI 投资分化**\n- 2025年有效的AI股票在2026年不再适用\n- 数据中心相关股票表现强劲，AI agent公司营收增长14%\n\n**能源挑战**\n- 国际能源署：数据中心用电量年增15%，到2030年超过整体能源增速4倍\n- Vertiv将推出针对Nvidia硬件的800伏电力系统\n\n## 🔧 工具新品\n\n- **Mistral AI**: Boxrol TTS - 多语言低延迟语音合成\n- **Anthropic**: Operon - 生物研究AI代理\n- **ElevenLabs**: ElevenMusic - AI音乐生成应用\n\n---\n*来源：Reuters, The Motley Fool, TechCrunch, devflokers*"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1775350988833,
+  "lastError": "Request failed with status code 400"
+}
