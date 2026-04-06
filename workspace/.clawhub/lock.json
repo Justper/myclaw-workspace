@@ -4,6 +4,26 @@
     "summarize": {
       "version": "1.0.0",
       "installedAt": 1774251532845
+    },
+    "free-image-generation-skill": {
+      "version": "1.0.4",
+      "installedAt": 1775468337272
+    },
+    "beauty-generation-api": {
+      "version": "1.2.47",
+      "installedAt": 1775467508062
+    },
+    "image-cog": {
+      "version": "1.0.7",
+      "installedAt": 1775468193532
+    },
+    "cellcog": {
+      "version": "2.0.7",
+      "installedAt": 1775468220681
+    },
+    "antigravity-image-gen": {
+      "version": "2.0.0",
+      "installedAt": 1775468344951
     }
   }
 }

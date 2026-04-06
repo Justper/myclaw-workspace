@@ -1,0 +1,20 @@
+{
+  "id": "e491026f-0f0e-4a56-b4f0-cc15ac9bbe49",
+  "enqueuedAt": 1775437217425,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "# ❄️ AI每日资讯（2026年4月6日）\n\n## 核心趋势\n\n**AI从炒作走向务实** — 2026年是企业AI从实验走向生产落地的一年，企业更关注实际ROI而非概念验证。\n\n## 主要动态\n\n1. **推理模型爆发**：DeepSeek-R1等中国前沿模型崛起，推理模型成为新的标杆范式。\n\n2. **AI for Science加速**：\n   - OpenAI成立专门团队攻科学发现\n   - Google DeepMind发布AlphaEvolve，用LLM设计新算法解决未解问题\n   - Microsoft：2026年AI将主动参与物理、化学、生物的发现过程\n\n3. **Agentic AI爆发**：企业级AI Agent将在复杂工作流中广泛应用，\"非人类身份\"将超过人类用户。\n\n4. **Physical AI兴起**：World Labs（李飞飞团队）推出首个商业世界模型Marble；General Intuition获1.34亿美元融资教Agent空间推理。\n\n5. **MCP协议标准化**：OpenAI、Anthropic、Google联合推动MCP成为Linux Foundation标准，AI Agent连接工具将规范化。\n\n6. **小模型逆袭**：Mistral等公司证明精调后的小模型在多项基准测试中优于大模型。\n\n7. **AI主权化**：Stanford专家预测各国将加速建立独立于美国AI供应商的本土AI能力。\n\n8. **基础设施挑战**：Microsoft推出新计费模式防止数据中心电力成本转嫁给消费者。\n\n---\n*来源：MIT Tech Review, IBM, Microsoft, TechCrunch, Forbes, Reuters, Stanford HAI*"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "# ❄️ AI每日资讯（2026年4月6日）\n\n## 核心趋势\n\n**AI从炒作走向务实** — 2026年是企业AI从实验走向生产落地的一年，企业更关注实际ROI而非概念验证。\n\n## 主要动态\n\n1. **推理模型爆发**：DeepSeek-R1等中国前沿模型崛起，推理模型成为新的标杆范式。\n\n2. **AI for Science加速**：\n   - OpenAI成立专门团队攻科学发现\n   - Google DeepMind发布AlphaEvolve，用LLM设计新算法解决未解问题\n   - Microsoft：2026年AI将主动参与物理、化学、生物的发现过程\n\n3. **Agentic AI爆发**：企业级AI Agent将在复杂工作流中广泛应用，\"非人类身份\"将超过人类用户。\n\n4. **Physical AI兴起**：World Labs（李飞飞团队）推出首个商业世界模型Marble；General Intuition获1.34亿美元融资教Agent空间推理。\n\n5. **MCP协议标准化**：OpenAI、Anthropic、Google联合推动MCP成为Linux Foundation标准，AI Agent连接工具将规范化。\n\n6. **小模型逆袭**：Mistral等公司证明精调后的小模型在多项基准测试中优于大模型。\n\n7. **AI主权化**：Stanford专家预测各国将加速建立独立于美国AI供应商的本土AI能力。\n\n8. **基础设施挑战**：Microsoft推出新计费模式防止数据中心电力成本转嫁给消费者。\n\n---\n*来源：MIT Tech Review, IBM, Microsoft, TechCrunch, Forbes, Reuters, Stanford HAI*"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1775437217767,
+  "lastError": "Request failed with status code 400"
+}
