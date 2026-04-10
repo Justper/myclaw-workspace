@@ -1,0 +1,20 @@
+{
+  "id": "602cc276-561e-490b-89b1-a04845a729d2",
+  "enqueuedAt": 1775783070597,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "**2026年4月10日 AI资讯简报**\n\n**🔥 重点关注**\n\n**Meta AI 跻身 App Store 前5**\nMeta 发布的 Muse Spark 模型使其 AI 应用排名从第57位飙升至第5位，股价上涨4%。这是 Meta 一年多来首个重大 AI 模型更新，由新收购的 Superintelligence Labs 负责人 Alexandr Wang 主导。\n\n**Niantic Spatial 重大更新**\n- 推出 Scaniverse for business：构建可机器化的 3D 模型\n- VPS 2.0：达厘米级定位精度\n- NSDK 4.0：支持 Unity、Swift、Android 和 ROS 2\n将重塑本地 AR、机器人和物流领域。\n\n**🤖 行业动态**\n\n- **Anthropic** 牵手 Google 和 Broadcom：准备部署 3.5 吉瓦计算资源，使用 TPU\n- **OpenAI** 因能源成本和监管障碍，暂停英国 Stargate 计划\n- **Anthropic** 推出 Claude Managed Agents，软件股集体承压\n- **AI 笔记工具诉讼** 暴露企业潜在责任风险\n- **Steven Soderbergh** 计划在西班牙内战电影中大量使用 AI\n\n**🎬 娱乐/营销**\n\n- Luma \"Dream Brief\" 21支 AI 生成的广告短片将角逐戛纳金狮\n- AI 演员平台 Twinnin 引发热议，Spotlight 发文警告演员慎用\n\n**📝 简评**\n\nAI 领域继续快速演进，Meta 和 Niantic 的发布是本周最大亮点。能源成本和监管问题开始影响大型 AI 项目推进。"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "**2026年4月10日 AI资讯简报**\n\n**🔥 重点关注**\n\n**Meta AI 跻身 App Store 前5**\nMeta 发布的 Muse Spark 模型使其 AI 应用排名从第57位飙升至第5位，股价上涨4%。这是 Meta 一年多来首个重大 AI 模型更新，由新收购的 Superintelligence Labs 负责人 Alexandr Wang 主导。\n\n**Niantic Spatial 重大更新**\n- 推出 Scaniverse for business：构建可机器化的 3D 模型\n- VPS 2.0：达厘米级定位精度\n- NSDK 4.0：支持 Unity、Swift、Android 和 ROS 2\n将重塑本地 AR、机器人和物流领域。\n\n**🤖 行业动态**\n\n- **Anthropic** 牵手 Google 和 Broadcom：准备部署 3.5 吉瓦计算资源，使用 TPU\n- **OpenAI** 因能源成本和监管障碍，暂停英国 Stargate 计划\n- **Anthropic** 推出 Claude Managed Agents，软件股集体承压\n- **AI 笔记工具诉讼** 暴露企业潜在责任风险\n- **Steven Soderbergh** 计划在西班牙内战电影中大量使用 AI\n\n**🎬 娱乐/营销**\n\n- Luma \"Dream Brief\" 21支 AI 生成的广告短片将角逐戛纳金狮\n- AI 演员平台 Twinnin 引发热议，Spotlight 发文警告演员慎用\n\n**📝 简评**\n\nAI 领域继续快速演进，Meta 和 Niantic 的发布是本周最大亮点。能源成本和监管问题开始影响大型 AI 项目推进。"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1775783070911,
+  "lastError": "Request failed with status code 400"
+}
