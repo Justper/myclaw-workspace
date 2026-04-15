@@ -1,0 +1,20 @@
+{
+  "id": "b95a33c4-6085-43a0-9bb6-d82363ca598a",
+  "enqueuedAt": 1776214971970,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "# 2026年4月15日 AI每日资讯\n\n## 🔥 热门头条\n\n**加州全AI运营零售店开业**\n旧金山一家完全由AI开发和运营的零售店引起关注，展示AI在零售业的前沿应用。\n\n## 🚗 汽车\n\n- **Geely发布AI混动技术** 对决Toyota\n- **Nissan** 下代Rogue将作为混动车型首发\n- **BMW** 在2026豪华车市场战役中领先Lexus\n\n## 🏛️ 企业动态\n\n- **TSMC显示AI需求走向** — AI服务器/芯片需求持续强劲\n- **ZTE转型AI基础设施** — 2025计算收入增长150%，计算业务占比24.6%\n- **中国成工业机器人净出口国** — 2025年出口增长48.7%\n\n## 🔐 安全\n\n- **Anthropic Mythos引争议** — AI网络安全社区对\"AI bugmageddon\"看法分歧\n- **Anthropic称最新AI模型太强大不公开**\n- **Tenzai AI工具** 在黑客竞赛中击败99%人类选手\n\n## 📱 应用\n\n- **纽约市发布AI校园使用指南**\n- **AI面部识别误抓** 田纳西奶奶\n- **人们转向AI聊天机器人** 问医疗问题\n- **大学教授用口试对抗AI代笔**\n\n## 💼 商业\n\n- **OpenAI\"惊人需求\"备忘录** 曝光\n- **Elon Musk预测** 2040年全球10亿人形机器人市场\n\n---\n\n*来源: Tavily*"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "# 2026年4月15日 AI每日资讯\n\n## 🔥 热门头条\n\n**加州全AI运营零售店开业**\n旧金山一家完全由AI开发和运营的零售店引起关注，展示AI在零售业的前沿应用。\n\n## 🚗 汽车\n\n- **Geely发布AI混动技术** 对决Toyota\n- **Nissan** 下代Rogue将作为混动车型首发\n- **BMW** 在2026豪华车市场战役中领先Lexus\n\n## 🏛️ 企业动态\n\n- **TSMC显示AI需求走向** — AI服务器/芯片需求持续强劲\n- **ZTE转型AI基础设施** — 2025计算收入增长150%，计算业务占比24.6%\n- **中国成工业机器人净出口国** — 2025年出口增长48.7%\n\n## 🔐 安全\n\n- **Anthropic Mythos引争议** — AI网络安全社区对\"AI bugmageddon\"看法分歧\n- **Anthropic称最新AI模型太强大不公开**\n- **Tenzai AI工具** 在黑客竞赛中击败99%人类选手\n\n## 📱 应用\n\n- **纽约市发布AI校园使用指南**\n- **AI面部识别误抓** 田纳西奶奶\n- **人们转向AI聊天机器人** 问医疗问题\n- **大学教授用口试对抗AI代笔**\n\n## 💼 商业\n\n- **OpenAI\"惊人需求\"备忘录** 曝光\n- **Elon Musk预测** 2040年全球10亿人形机器人市场\n\n---\n\n*来源: Tavily*"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1776214972305,
+  "lastError": "Request failed with status code 400"
+}
