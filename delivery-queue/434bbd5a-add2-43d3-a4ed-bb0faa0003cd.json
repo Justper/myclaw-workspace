@@ -1,0 +1,20 @@
+{
+  "id": "434bbd5a-add2-43d3-a4ed-bb0faa0003cd",
+  "enqueuedAt": 1776301374272,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "## 📰 AI每日资讯 — 2026年4月16日\n\n**行业动态**\n\n- **ASML上调2026年销售预测**：AI需求推动增长，全球AI支出激增带动光刻机需求\n- **KraneShares在阿布扎比证券交易所推出AI ETF (AGIX)**：为投资者提供AI领域投资机会\n- **2026花旗AI峰会**：汇聚全球AI领袖与投资者\n\n**技术前沿**\n\n- **Zeta.ai在AACR 2026亮相**：全球首个多智能体AI共同科学家，用于罕见癌症研究\n- **《自然》杂志**：AI加速废热转电设备设计\n- **Meta推出Muse Spark模型**：首个公开模型，在基准测试中表现出色\n\n**中国动态**\n\n- **教育部发布《\"人工智能+教育\"行动计划\"**：推动AI与教育深度融合\n- **AIIA安全治理委员会会议在武汉举行**：发布《OpenClaw类智能体部署风险管理指南》\n\n**监管趋势**\n\n- **全球统一化AI监管体系落地**：欧盟《人工智能法案》全面生效，按风险分级监管\n\n**产品更新**\n\n- **OpenAI推出ChatGPT Pro计划**：100美元/月，针对高级用户"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "## 📰 AI每日资讯 — 2026年4月16日\n\n**行业动态**\n\n- **ASML上调2026年销售预测**：AI需求推动增长，全球AI支出激增带动光刻机需求\n- **KraneShares在阿布扎比证券交易所推出AI ETF (AGIX)**：为投资者提供AI领域投资机会\n- **2026花旗AI峰会**：汇聚全球AI领袖与投资者\n\n**技术前沿**\n\n- **Zeta.ai在AACR 2026亮相**：全球首个多智能体AI共同科学家，用于罕见癌症研究\n- **《自然》杂志**：AI加速废热转电设备设计\n- **Meta推出Muse Spark模型**：首个公开模型，在基准测试中表现出色\n\n**中国动态**\n\n- **教育部发布《\"人工智能+教育\"行动计划\"**：推动AI与教育深度融合\n- **AIIA安全治理委员会会议在武汉举行**：发布《OpenClaw类智能体部署风险管理指南》\n\n**监管趋势**\n\n- **全球统一化AI监管体系落地**：欧盟《人工智能法案》全面生效，按风险分级监管\n\n**产品更新**\n\n- **OpenAI推出ChatGPT Pro计划**：100美元/月，针对高级用户"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1776301374590,
+  "lastError": "Request failed with status code 400"
+}
