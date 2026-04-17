@@ -1,0 +1,20 @@
+{
+  "id": "1d2503c9-e7f5-4553-909a-e55e2a4d1bb8",
+  "enqueuedAt": 1776387798928,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "## 2026年4月AI资讯汇总\n\n### 🔥 重大融资\n- **OpenAI**：完成1100亿美元融资，估值达8400亿美元，由Amazon（500亿）、NVIDIA（300亿）、SoftBank（300亿）领投——史上最大私募融资\n- **Neysa**（印度AI云基础设施）：获6亿美元融资，估值14亿美元，Blackstone领投\n- **Runway**（AI视频生成）：获3.15亿美元融资，估值53亿美元\n\n### 🇨🇳 中国动态\n- **智谱AI**：发布GLM-5（745B MoE模型），基于华为昇腾芯片训练，上下文窗口20万token\n- **Anthropic披露**：指控DeepSeek、Moonshot、MiniMax三家中国AI实验室对Claude进行“工业规模”蒸馏攻击，通过约24000个欺诈账户提取模型能力\n- **中国生成式AI**：已有700+款大模型完成备案\n\n### 🌐 国际动态\n- **Google CEO Sundar Pichai**：表示美国必须在AI领域保持领先地位\n- **Morgan Stanley**：警告2026年将有AI重大突破\n- **ARK Investment**：将OpenAI纳入ETF，减持NVIDIA\n\n### 🛡️ 监管治理\n- **中国十部门**：联合印发《人工智能科技伦理审查与服务办法（试行）》，AI治理从“软倡导”进入“硬约束”\n\n### 💻 技术发展\n- **Meta**：发布Muse Spark\n- **Alibaba**：Wan 2.1 AI视频模型开源\n- **AI驱动编程**：正在兴起，暗影AI安全风险引发关注"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "## 2026年4月AI资讯汇总\n\n### 🔥 重大融资\n- **OpenAI**：完成1100亿美元融资，估值达8400亿美元，由Amazon（500亿）、NVIDIA（300亿）、SoftBank（300亿）领投——史上最大私募融资\n- **Neysa**（印度AI云基础设施）：获6亿美元融资，估值14亿美元，Blackstone领投\n- **Runway**（AI视频生成）：获3.15亿美元融资，估值53亿美元\n\n### 🇨🇳 中国动态\n- **智谱AI**：发布GLM-5（745B MoE模型），基于华为昇腾芯片训练，上下文窗口20万token\n- **Anthropic披露**：指控DeepSeek、Moonshot、MiniMax三家中国AI实验室对Claude进行“工业规模”蒸馏攻击，通过约24000个欺诈账户提取模型能力\n- **中国生成式AI**：已有700+款大模型完成备案\n\n### 🌐 国际动态\n- **Google CEO Sundar Pichai**：表示美国必须在AI领域保持领先地位\n- **Morgan Stanley**：警告2026年将有AI重大突破\n- **ARK Investment**：将OpenAI纳入ETF，减持NVIDIA\n\n### 🛡️ 监管治理\n- **中国十部门**：联合印发《人工智能科技伦理审查与服务办法（试行）》，AI治理从“软倡导”进入“硬约束”\n\n### 💻 技术发展\n- **Meta**：发布Muse Spark\n- **Alibaba**：Wan 2.1 AI视频模型开源\n- **AI驱动编程**：正在兴起，暗影AI安全风险引发关注"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1776387799260,
+  "lastError": "Request failed with status code 400"
+}
