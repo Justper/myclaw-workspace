@@ -1,0 +1,20 @@
+{
+  "id": "f44bae88-9e8c-4092-89bd-fee2dc20a6e1",
+  "enqueuedAt": 1776560586576,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "## 2026年4月19日 AI每日资讯\n\n### 🔥 热门焦点\n\n**斯坦福2026 AI指数报告发布**\n- 美中AI差距缩小至2.7%\n- 全球AI顶尖人才95%集中在大型科技公司\n- 22-25岁开发者就业机会减少20%\n- SWE-bench编程能力从60%飙升至近100%\n- 但AI\"过拟合\"严重：能拿IMO金牌却无法准确读取模拟时钟（准确率仅50.1%）\n\n**Forbes 2026 AI 50榜单揭晓**\n- 转向AI独立性：重视控制权、成本和实际应用\n- 上榜公司累计融资3056亿美元，OpenAI独占1826亿\n- 新兴公司如Lovable、Black Forest Labs、Reflection AI正在崛起\n\n**AI编程初创公司Factory**\n- 正在融资1.5亿美元，估值15亿美元\n- Khosla Ventures领投，Sequoia、Insight Partners参投\n\n**Meta巨资打造\"虚拟扎克伯格\"**\n- 拟创建超逼真AI头像供员工对话\n- 体现Meta对AI个人助理的野心\n\n**胡ayan Robotics登录港交所**\n- 协作机器人公司，IPO超购5000倍\n- 将亮相汉诺威工业博览会（4月20-24日）\n\n### 📊 行业趋势\n- Agentic AI崛起带来安全治理挑战\n- 全球AI算力3年增长30倍，NVIDIA占据60%市场份额\n- AI从\"预测\"转向\"现实\"，影响就业市场"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "## 2026年4月19日 AI每日资讯\n\n### 🔥 热门焦点\n\n**斯坦福2026 AI指数报告发布**\n- 美中AI差距缩小至2.7%\n- 全球AI顶尖人才95%集中在大型科技公司\n- 22-25岁开发者就业机会减少20%\n- SWE-bench编程能力从60%飙升至近100%\n- 但AI\"过拟合\"严重：能拿IMO金牌却无法准确读取模拟时钟（准确率仅50.1%）\n\n**Forbes 2026 AI 50榜单揭晓**\n- 转向AI独立性：重视控制权、成本和实际应用\n- 上榜公司累计融资3056亿美元，OpenAI独占1826亿\n- 新兴公司如Lovable、Black Forest Labs、Reflection AI正在崛起\n\n**AI编程初创公司Factory**\n- 正在融资1.5亿美元，估值15亿美元\n- Khosla Ventures领投，Sequoia、Insight Partners参投\n\n**Meta巨资打造\"虚拟扎克伯格\"**\n- 拟创建超逼真AI头像供员工对话\n- 体现Meta对AI个人助理的野心\n\n**胡ayan Robotics登录港交所**\n- 协作机器人公司，IPO超购5000倍\n- 将亮相汉诺威工业博览会（4月20-24日）\n\n### 📊 行业趋势\n- Agentic AI崛起带来安全治理挑战\n- 全球AI算力3年增长30倍，NVIDIA占据60%市场份额\n- AI从\"预测\"转向\"现实\"，影响就业市场"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1776560586887,
+  "lastError": "Request failed with status code 400"
+}
