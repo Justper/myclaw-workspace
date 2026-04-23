@@ -1,0 +1,20 @@
+{
+  "id": "6da82bda-84e0-4fcc-9811-62e6dd914c2c",
+  "enqueuedAt": 1776913496926,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "# AI每日资讯（2026年4月23日）\n\n## 🔥重点新闻\n\n**Anthropic Mythos模型引发全球担忧**\nAnthropic新发布的Mythos AI模型因安全风险过高选择不公开全面发布，仅与美国11个组织合作进行安全防御。该模型被指可能存在\"增强版黑客攻击\"风险。纽约时报报道。（nytimes.com）\n\n**联合国AI专家呼吁减速**\n联合国AI独立科学面板专家表示，现在是时候给\"失控的AI\"踩刹车了。UN新闻呼吁将人类置于AI发展的核心位置。（news.un.org）\n\n**AI经济影响力报告**\nCS Global Partners报告显示，AI已成为重塑全球经济格局的核心驱动力。美国处于AI驱动的转型顶端，AI相关支出正在推动GDP增长。（csglobalpartners.com）\n\n---\n\n## 📱行业动态\n\n- **OpenAI Images 2.0**: 能在图像内生成文本，视觉与文本AI能力融合更进一步\n- **Google Gemini**: 扩展到Chrome，新增澳大利亚、日本等7个国家\n- **Dezer音乐平台**: 44%新上传音乐为AI生成，大部分因欺诈被取消 monetization\n- **Apple**: CEO交接引发关注\n\n## 🛡️安全视点\n\n- **WEF网络安全展望2026**: 87%的企业将AI漏洞视为增长最快的风险\n- **CISO关注**: AI工具安全评估率从37%升至64%\n- **数字遗产与AI**: 华盛顿州将立法保护\"伪造数字肖像\"，每违规最高罚款$3000\n\n---\n\n*来源: Tavily AI搜索*\n\nNO_REPLY"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "# AI每日资讯（2026年4月23日）\n\n## 🔥重点新闻\n\n**Anthropic Mythos模型引发全球担忧**\nAnthropic新发布的Mythos AI模型因安全风险过高选择不公开全面发布，仅与美国11个组织合作进行安全防御。该模型被指可能存在\"增强版黑客攻击\"风险。纽约时报报道。（nytimes.com）\n\n**联合国AI专家呼吁减速**\n联合国AI独立科学面板专家表示，现在是时候给\"失控的AI\"踩刹车了。UN新闻呼吁将人类置于AI发展的核心位置。（news.un.org）\n\n**AI经济影响力报告**\nCS Global Partners报告显示，AI已成为重塑全球经济格局的核心驱动力。美国处于AI驱动的转型顶端，AI相关支出正在推动GDP增长。（csglobalpartners.com）\n\n---\n\n## 📱行业动态\n\n- **OpenAI Images 2.0**: 能在图像内生成文本，视觉与文本AI能力融合更进一步\n- **Google Gemini**: 扩展到Chrome，新增澳大利亚、日本等7个国家\n- **Dezer音乐平台**: 44%新上传音乐为AI生成，大部分因欺诈被取消 monetization\n- **Apple**: CEO交接引发关注\n\n## 🛡️安全视点\n\n- **WEF网络安全展望2026**: 87%的企业将AI漏洞视为增长最快的风险\n- **CISO关注**: AI工具安全评估率从37%升至64%\n- **数字遗产与AI**: 华盛顿州将立法保护\"伪造数字肖像\"，每违规最高罚款$3000\n\n---\n\n*来源: Tavily AI搜索*\n\nNO_REPLY"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1776913497263,
+  "lastError": "Request failed with status code 400"
+}
