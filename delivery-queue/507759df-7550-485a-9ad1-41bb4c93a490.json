@@ -14,7 +14,7 @@
     "agentId": "main",
     "text": "# AI每日资讯 2026年4月13日\n\n## 🚀 AI眼镜崛起\n2026年6款AI智能眼镜蓄势待发，可能颠覆手机行业。苹果、Snap、Meta等巨头竞速，Ray-Ban入门价$499预计今年出货1340万台。苹果测试多种镜框，2027年上市。\n\n## 🏠 家用人形机器人突破\n**UniX AI**宣布第三代机器人Panther完成真实家庭环境多任务验证（起床、整理床铺、准备早餐、清扫等），成為全球首款可量产家用人形机器人第二代Wanda 2.0去年已月交付超100台。\n\n## 🖥️ 阿里发布Qwen3.6-Plus\n阿里推出Qwen3.6-Plus企业级Agent AI模型，100万token上下文窗口，支持自主代码工程、测试、调试。整合至Wukong平台和Qwen App。\n\n## 📰 其他\n- **OpenAI**：发现第三方工具安全问题，用户数据未泄露\n- **Anthropic Mythos**：英国监管机构审查其风险\n- **OpenAI/Anthropic IPO**：或在年底前完成，训练成本成挑战\n\n---\n\n*来源：Reuters / Business Insider / Glass Almanac 等*"
   },
-  "retryCount": 1,
-  "lastAttemptAt": 1776042209655,
+  "retryCount": 2,
+  "lastAttemptAt": 1776913276302,
   "lastError": "Request failed with status code 400"
 }

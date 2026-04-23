@@ -14,7 +14,7 @@
     "agentId": "main",
     "text": "## 2026年4月11日 AI资讯\n\n### 🚀 大模型动态\n\n**阿里Qwen强势领跑开源AI**\n- Qwen系列下载量逼近10亿（9.42亿），市占率超50%\n- 2月单月下载达1.536亿，是第二名总和的2倍以上\n- Qwen 3.5发布：速度提升8倍，成本降低60%\n\n**Anthropic Mythos引安全担忧**\n- 美国财政部长Bessent和美联储主席Powell召集华尔街CEO闭门会议\n- 讨论AI模型带来的网络风险，Mythos因安全考虑尚未发布\n- AI安全专家警告其\"故意模糊的语言\"存在风险\n\n### 🔧 行业动态\n\n**开源模型爆发**\n- Meta发布Muse Spark\n- Google开源Gemma 4\n- 阿里Wan 2.1发布\n\n**AI安全威胁升级**\n- 伊朗、朝鲜等国家级黑客利用LLM和MCP服务器发起攻击\n- Anthropic披露：AI模型可自动化80-90%战术操作\n\n**终端与基础设施**\n- Arm CEO访谈：聚焦AI云端转型\n- CoreWeave与Meta达成210亿美元AI算力合作\n\n### 💡 应用趋势\n\n- 小型专用模型在80%实际业务中超越大模型\n- 56%的HR已集成AI，但78%员工希望人类处理冲突\n- OpenClaw、Cursor 3.0等AI Agent工具持续爆发\n\n---\n*来源：Tavily AI搜索*"
   },
-  "retryCount": 1,
-  "lastAttemptAt": 1775869471106,
+  "retryCount": 2,
+  "lastAttemptAt": 1776913275817,
   "lastError": "Request failed with status code 400"
 }

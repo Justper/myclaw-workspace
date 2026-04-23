@@ -14,7 +14,7 @@
     "agentId": "main",
     "text": "## 2026年4月8日 AI每日资讯\n\n### 🚀 大公司合作\n\n**OpenAI、Anthropic、Google联手防中国克隆模型**\n三大AI巨头通过Frontier Model Forum共享信息，检测所谓\"对抗性蒸馏\"(adversarial distillation)尝试，防止中国竞争对手从美国先进AI模型中提取结果来追赶。Google已发布博客称发现模型提取尝试增加。\n\n**Anthropic牵手Google/Broadcom**\nAnthropic与Google、Broadcom签署新协议，获得约3.5吉瓦下一代TPU算力将于2027年上线。Anthropic今年收入突破300亿美元，企业客户超1000家。\n\n---\n\n### 💰 行业数据\n\n**AI infrastructure投资大新闻**\nNvidia CEO黄仁勋称，建设1GW数据中心需600-800亿美元。Brookfield、Blackstone等已承诺700亿美元投入AI基础设施。\n\n**Goldman Sachs：AI失业影响深远**\n被AI取代的工人不仅短期难找工作，收入下降超3%，且10年后真实收入仍比未失业者低10个百分点。AI造成\"持久疤痕\"效应。\n\n---\n\n### 🌍 市场趋势\n\nAI正从生产力工具演变为核心业务引擎，企业正转向生成式AI驱动的增长模式。全球AI市场快速扩张焦点转向可扩展AI系统。\n\n---\n\n更多详细访问: reuters.com / fortune.com / siliconrepublic.com"
   },
-  "retryCount": 1,
-  "lastAttemptAt": 1775610199484,
+  "retryCount": 2,
+  "lastAttemptAt": 1776913274905,
   "lastError": "Request failed with status code 400"
 }

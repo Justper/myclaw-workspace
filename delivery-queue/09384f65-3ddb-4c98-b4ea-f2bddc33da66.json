@@ -14,7 +14,7 @@
     "agentId": "main",
     "text": "# ❄️ 2026年3月28日 AI每日资讯\n\n## 核心趋势\n\n**1. Agentic AI (代理式AI) 崛起**\n- 2026年是企业级AI从实验走向生产的关键年份\n- AI代理将开始在组织中超过人类用户数量\n- 重点转向复杂企业工作流和网络安全\n\n**2. AI for Science (AI驱动的科学研究)**\n- Microsoft：AI将不仅仅是总结论文，而将主动参与物理、化学、生物的发现过程\n- Google DeepMind 发布 AlphaEvolve，用AI生成新算法解决未解问题\n- OpenAI 成立专门团队专注科学研究\n\n**3. AI主权化**\n- Stanford专家：各国将展示对AI提供商的独立性\n- 患者需要了解AI\"帮助\"背后的依据，医疗AI透明度变得关键\n\n**4. 挑战Nvidia**\n- 中国大力开发先进AI芯片\n- Nvidia主导地位目前仍难以撼动\n\n## 商业动态\n\n- **Morgan Stanley**: 2026上半年将有重大AI突破，大部分人尚未准备好\n- **Meta**: 在路易斯安那州建设超大规模数据中心\n- **Microsoft**: 推出\"AI超级工厂\"连接数据中心降低成本\n- **Apple**: 联合创始人Wozniak谈AI使用与模拟技术\n\n## 技术热点\n\n- **推理模型 (Reasoning Models)**: 成为新的最佳实践范式\n- **AI Agents**: 生成和执行代码，连接LLM与计算机逻辑\n- **企业部署**: 从实验转向生产级系统，追求实际ROI\n\n---\n*来源: Microsoft, IBM, Stanford HAI, Forbes, MIT Technology Review, Fortune*"
   },
-  "retryCount": 1,
-  "lastAttemptAt": 1774659730304,
+  "retryCount": 2,
+  "lastAttemptAt": 1776913272112,
   "lastError": "Request failed with status code 400"
 }

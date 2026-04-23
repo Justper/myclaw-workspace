@@ -14,7 +14,7 @@
     "agentId": "main",
     "text": "# AI每日资讯 (2026年4月7日)\n\n## 🔥 重点新闻\n\n**马斯克合并SpaceX与xAI**\n- SpaceX与xAI合并，\"Grok\"模型将嵌入SpaceX操作，加速全自动航天器研发和机器人火星殖民地建设\n\n**Physical AI崛起**\n- 2026年物理AI大热：AI与先进机器人、传感器技术结合，获得\"物理身体\"感知和交互现实世界\n- IBM预测Scaling将遇瓶颈，行业对物理AI兴趣激增\n\n## 🤖 Agentic AI成主流\n\n- 2026是**Agentic AI年**：从被动助手转向主动参与者\n- 大型行动模型(LAMs)使AI能直接操作软件接口和API，最小人工监督下执行多步骤工作流\n- 企业关注\"Agent Ready\"评分：治理、编排、集成能力\n\n## 🔬 AI科研突破\n\n- AI从诊断扩展到症状分诊和治疗规划，进入真实医疗场景\n- AI将主动参与科学发现：生成假设、控制实验、与人类/AI协作\n- 量子计算混合方法带来突破\n\n## 🏢 企业AI趋势\n\n- **编排(Orchestration)**成为AI规模化落地的关键\n- AI治理从政策转向运营模型：明确自主行动边界、升级路径、可审计性\n- 开源AI生态增长：Llama、Granite、Olmo 3、DeepSeek等小模型表现亮眼\n\n## ⚠️ 风险与挑战\n\n- **深度伪造常态化**：制作简单、辟谣困难，新闻/民主/法律受冲击\n- AI经济影响将可量化：出现高频\"AI经济仪表板\"追踪生产力/失业情况\n\n---\n*来源: Microsoft, IBM, UC Berkeley, Stanford HAI, International Banker, Reuters Institute*"
   },
-  "retryCount": 1,
-  "lastAttemptAt": 1775523762081,
+  "retryCount": 2,
+  "lastAttemptAt": 1776913274603,
   "lastError": "Request failed with status code 400"
 }

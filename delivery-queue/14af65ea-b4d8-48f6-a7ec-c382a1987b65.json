@@ -14,7 +14,7 @@
     "agentId": "main",
     "text": "# AI资讯简报 - 2026年4月9日\n\n**科技行业裁员潮**\n2026年Q1近8万名科技员工被裁，约50%岗位因AI被砍。Oracle削减超1万岗位，将节省资金投向数据中心。Anthropic CEO Dario Amodei此前警告：AI或在未来5年导致20%失业，消灭半数入门级白领岗位。MIT模拟显示，AI可替代约12%美国劳动力，相当于1.2万亿美元薪资。\n\n**白宫发布AI政策框架**\n3月20日，白宫发布《国家人工智能政策框架》，为AI监管提供立法建议。\n\n**Meta发布新AI模型**\nMeta推出Muse和Spark模型，系其超级智能实验室首个成果。同日Anthropic称其新模型Claude Mythos因网络安全风险过强而暂不发布。\n\n**AI教育与就业**\nForbes发布\"新常春藤\"榜单：20所拥抱AI的雇主友好院校。Carnegie Mellon 2025年AI相关岗位毕业生同比翻倍至100人。IBM逆势增招入门级员工，称AI虽能完成多数基础工作但仍需人类把关。\n\n**医疗AI进展**\nDigital EyeCon 2026大会聚焦AI与远程患者监护在眼科及医疗领域的应用。"
   },
-  "retryCount": 1,
-  "lastAttemptAt": 1775696454820,
+  "retryCount": 2,
+  "lastAttemptAt": 1776913275217,
   "lastError": "Request failed with status code 400"
 }

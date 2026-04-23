@@ -14,7 +14,7 @@
     "agentId": "main",
     "text": "**AI每日资讯** 📅 2026年4月14日 周二\n\n---\n\n**🔬 技术前沿**\n- **Stanford AI Index 2026**: 模型在困难基准测试上准确率突破50%（Claude Opus 4.6、Gemini 3.1 Pro）\n- 训练前沿模型的碳排放量激增：xAI Grok 4预估超72,000吨（GPT-4仅5,184吨）\n- OpenClaw 开源项目已获352,000星\n\n**📊 商业应用**\n- **88%** 企业已采用AI（同比+10%）；生成式AI使用率达**79%**\n- Microsoft AI CEO：多数白领工作12-18个月可自动化\n- PwC警告拒绝AI的合伙人\"没有位置\"\n\n**🏭 行业动态**\n- 工业：AI agents进入OT运营，Agentic AI成为展会焦点\n- 电信：自保护AI成为基础设施安全必需，勒索攻击3年增275%\n- 保险：网络风险公司警告勿仅将AI视为\"风险乘数\"\n- 农业：Agentic AI开始替代传统精准农业\n\n**🌐 企业风向**\n- 现代汽车董事长加码AI+机器人，股价近一年涨近3倍\n- Huayan Robotics港股IPO超募5000倍，将亮相汉诺威 MESSE 2026"
   },
-  "retryCount": 1,
-  "lastAttemptAt": 1776128526916,
+  "retryCount": 2,
+  "lastAttemptAt": 1776913276534,
   "lastError": "Request failed with status code 400"
 }
