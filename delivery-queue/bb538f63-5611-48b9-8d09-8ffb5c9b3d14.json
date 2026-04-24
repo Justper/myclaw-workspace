@@ -1,0 +1,20 @@
+{
+  "id": "bb538f63-5611-48b9-8d09-8ffb5c9b3d14",
+  "enqueuedAt": 1776992596546,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "**AI 每日资讯** 📰 | 2026-04-24\n\n**🔥 大模型动态**\n- **OpenAI** GPT-5.4 系列（Instant/Thinking/Pro）已全面上线，上线 1M token 上下文窗口，事实错误率比 GPT-5.2 低 33%。GPT-5.5 泄露消息未获官方确认。\n- **Anthropic** Claude Opus 4.7 正式发布，定位为长程 Agent 推理引擎，与 GPT-5.5 在 10 项基准中各胜 6 项。\n- **Google** Gemini 2.5 Pro / 3.1 Pro 扩展多模态能力，上线双倍上下文窗口，强化代码生成与视觉任务。\n- **Meta** Llama 4 Scout 推出 2 万亿参数变体，瞄准开源生产与研究场景。\n- **xAI** Grok 4.20 Beta 2 上线四 Agent 协作系统 + 实时联网；Grok 5（≈6 万亿参数）预计 Q2 发布，性能较 GPT-4 提升 6 倍。\n\n**🤖 计算机视觉 & 机器人**\n- **CVPR 2026**（6月3-7日，丹佛）展示大量视觉-动作融合研究：AutoGaze 视频理解优化、C-GSPN ViT 延迟降低 10 倍、Watch & Learn 从网络视频生成 UI 自动化轨迹。\n- **Physical Intelligence** π 0.7 模型可在陌生厨房/卧室环境中操控移动机械臂，通用具身 AI 迈出关键一步。\n- **香港 InnoEX 2026** 展出逾 100 台机器人，AgiBot X2 Ultra 展示高级语言交互与灵巧操作，全球刷屏。\n\n**💡 类脑芯片**\n- 剑桥大学HfO₂ 忆阻器芯片实现存算一体，理论上可将 AI 能耗削减 70%。\n- Intel Loihi 3（8M 神经元/1.2W）、IBM NorthPole（256核/比 H100 效率高 25 倍）、BrainChip Akida 2.0（1.2M 神经元/0.5W）均已商业化或进入量产阶段。\n\n**⚔️ 网络安全**\n- 国家级攻击者正利用 Gemini 等模型编写漏洞代码、自动化侦察，AI 生成钓鱼攻击同比上升 89%（CrowdStrike）。\n- 61% 企业工作流已嵌入 AI Agent，推动安全监控服务升级。\n\n**💰 行业大事**\n- Anthropic 与 AWS 签署 10 年 / 1000 亿美元合作；SpaceX 以 2500 亿美元收购 xAI，打造 AI + 太空垂直生态。\n- Q1 2026 AI 风险投资达 2970 亿美元；79% 企业已部署 AI Agent，预计年底 40% 企业应用内置 Agent。\n\n---\n📊 来源：Tavily Research，涵盖 LLM Stats / Forbes / CrowdStrike / CVPR 2026 / ScienceDaily 等24个来源。"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "**AI 每日资讯** 📰 | 2026-04-24\n\n**🔥 大模型动态**\n- **OpenAI** GPT-5.4 系列（Instant/Thinking/Pro）已全面上线，上线 1M token 上下文窗口，事实错误率比 GPT-5.2 低 33%。GPT-5.5 泄露消息未获官方确认。\n- **Anthropic** Claude Opus 4.7 正式发布，定位为长程 Agent 推理引擎，与 GPT-5.5 在 10 项基准中各胜 6 项。\n- **Google** Gemini 2.5 Pro / 3.1 Pro 扩展多模态能力，上线双倍上下文窗口，强化代码生成与视觉任务。\n- **Meta** Llama 4 Scout 推出 2 万亿参数变体，瞄准开源生产与研究场景。\n- **xAI** Grok 4.20 Beta 2 上线四 Agent 协作系统 + 实时联网；Grok 5（≈6 万亿参数）预计 Q2 发布，性能较 GPT-4 提升 6 倍。\n\n**🤖 计算机视觉 & 机器人**\n- **CVPR 2026**（6月3-7日，丹佛）展示大量视觉-动作融合研究：AutoGaze 视频理解优化、C-GSPN ViT 延迟降低 10 倍、Watch & Learn 从网络视频生成 UI 自动化轨迹。\n- **Physical Intelligence** π 0.7 模型可在陌生厨房/卧室环境中操控移动机械臂，通用具身 AI 迈出关键一步。\n- **香港 InnoEX 2026** 展出逾 100 台机器人，AgiBot X2 Ultra 展示高级语言交互与灵巧操作，全球刷屏。\n\n**💡 类脑芯片**\n- 剑桥大学HfO₂ 忆阻器芯片实现存算一体，理论上可将 AI 能耗削减 70%。\n- Intel Loihi 3（8M 神经元/1.2W）、IBM NorthPole（256核/比 H100 效率高 25 倍）、BrainChip Akida 2.0（1.2M 神经元/0.5W）均已商业化或进入量产阶段。\n\n**⚔️ 网络安全**\n- 国家级攻击者正利用 Gemini 等模型编写漏洞代码、自动化侦察，AI 生成钓鱼攻击同比上升 89%（CrowdStrike）。\n- 61% 企业工作流已嵌入 AI Agent，推动安全监控服务升级。\n\n**💰 行业大事**\n- Anthropic 与 AWS 签署 10 年 / 1000 亿美元合作；SpaceX 以 2500 亿美元收购 xAI，打造 AI + 太空垂直生态。\n- Q1 2026 AI 风险投资达 2970 亿美元；79% 企业已部署 AI Agent，预计年底 40% 企业应用内置 Agent。\n\n---\n📊 来源：Tavily Research，涵盖 LLM Stats / Forbes / CrowdStrike / CVPR 2026 / ScienceDaily 等24个来源。"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1776992596873,
+  "lastError": "Request failed with status code 400"
+}
