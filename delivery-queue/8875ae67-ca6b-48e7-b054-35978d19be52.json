@@ -1,0 +1,20 @@
+{
+  "id": "8875ae67-ca6b-48e7-b054-35978d19be52",
+  "enqueuedAt": 1777078960062,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "## 2026年4月25日 AI每日资讯\n\n**大厂动态**\n\n- **Meta、Microsoft裁员风暴**：两家公司同时宣布共裁员约2万人，投入更多资金到AI。2026年已有超9.2万科技员工被裁，自2020年以来近90万人受影响。经济学家警告\"AI劳动力危机\"已来临，而非未来。\n- **Google Cloud Next 2026**：大会上指出95%的生成式AI试点失败，50%的项目因数据质量问题被放弃。企业需进行文化转变而非仅技术部署。\n\n**中国AI新动作**\n\n- **DeepSeek V4**：中国DeepSeek发布新模型挑战OpenAI和Anthropic，有望成为年度最大突破。\n\n**太空AI进展**\n- **Orbital公司**：宣布2027年4月发射首颗AI推理卫星，搭载NVIDIA Space-1 Vera Rubin GPU。\n\n**奖项速览**\n- March Networks获2026年AI卓越奖(Analytics类别)。\n\n**行业警示**\n- AI实际ROI仍偏低：全球CEO调查仅25%的AI项目产生预期回报，16%实现企业级扩展。\n\n---\n小智，今日资讯已送达 ❄️"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "## 2026年4月25日 AI每日资讯\n\n**大厂动态**\n\n- **Meta、Microsoft裁员风暴**：两家公司同时宣布共裁员约2万人，投入更多资金到AI。2026年已有超9.2万科技员工被裁，自2020年以来近90万人受影响。经济学家警告\"AI劳动力危机\"已来临，而非未来。\n- **Google Cloud Next 2026**：大会上指出95%的生成式AI试点失败，50%的项目因数据质量问题被放弃。企业需进行文化转变而非仅技术部署。\n\n**中国AI新动作**\n\n- **DeepSeek V4**：中国DeepSeek发布新模型挑战OpenAI和Anthropic，有望成为年度最大突破。\n\n**太空AI进展**\n- **Orbital公司**：宣布2027年4月发射首颗AI推理卫星，搭载NVIDIA Space-1 Vera Rubin GPU。\n\n**奖项速览**\n- March Networks获2026年AI卓越奖(Analytics类别)。\n\n**行业警示**\n- AI实际ROI仍偏低：全球CEO调查仅25%的AI项目产生预期回报，16%实现企业级扩展。\n\n---\n小智，今日资讯已送达 ❄️"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1777078960385,
+  "lastError": "Request failed with status code 400"
+}
