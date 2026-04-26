@@ -1,0 +1,20 @@
+{
+  "id": "a03b9f0a-71a8-4d97-9fdb-c75b38b258f5",
+  "enqueuedAt": 1777165229834,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "## 2026年4月26日 AI资讯汇总\n\n**大模型动态**\n\n- **OpenAI**: 发布GPT-5.5，新一代旗舰模型。已在ChatGPT全面上线（Plus/Pro/Business/Enterprise用户），在代码生成、科学研究基准测试中超越GPT-5及竞品。OpenAI首席科学家Jakub Pachocki表示\"过去两年发展意外缓慢\"，未来将有显著改进。\n- **Anthropic**: Claude在企业市场快速崛起。2026年3月美国企业付费使用率达30%（-vs年初4.1%），与OpenAI差距从13个百分点缩至5个百分点。Anthropic Claude Code和Cursor推动增长。\n- **Mistral AI**: 2026年Q1密集发布多款模型，包括企业级训练平台Mistral Forge，支持自主智能体Mistral Vibe管理超参数搜索、合成数据生成等。\n\n**行业趋势**\n\n- **Forbes AI 50**: 第八届AI 50榜单发布，聚焦全球最具潜力私营AI公司。AI已深度融入工作、信息搜索和创意表达。\n- **xAI与Mistral合作**: SpaceX/Cursor曾探讨与Mistral合作。xAI付费企业市场占有率达1.9%（2024年初接近零）。\n- **Google**: Gemini/Vertex AI/Workspace，企业使用率徘徊在3%-4.5%，增长缓慢。\n\n**其他**\n\n- 英媒Guardian发布评论漫画，讽刺伦敦大都会警局使用Palantir AI技术。\n\n---\n信息来源: TechCrunch, NYTimes, Forbes, Visual Capitalist, Business Insider等"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "## 2026年4月26日 AI资讯汇总\n\n**大模型动态**\n\n- **OpenAI**: 发布GPT-5.5，新一代旗舰模型。已在ChatGPT全面上线（Plus/Pro/Business/Enterprise用户），在代码生成、科学研究基准测试中超越GPT-5及竞品。OpenAI首席科学家Jakub Pachocki表示\"过去两年发展意外缓慢\"，未来将有显著改进。\n- **Anthropic**: Claude在企业市场快速崛起。2026年3月美国企业付费使用率达30%（-vs年初4.1%），与OpenAI差距从13个百分点缩至5个百分点。Anthropic Claude Code和Cursor推动增长。\n- **Mistral AI**: 2026年Q1密集发布多款模型，包括企业级训练平台Mistral Forge，支持自主智能体Mistral Vibe管理超参数搜索、合成数据生成等。\n\n**行业趋势**\n\n- **Forbes AI 50**: 第八届AI 50榜单发布，聚焦全球最具潜力私营AI公司。AI已深度融入工作、信息搜索和创意表达。\n- **xAI与Mistral合作**: SpaceX/Cursor曾探讨与Mistral合作。xAI付费企业市场占有率达1.9%（2024年初接近零）。\n- **Google**: Gemini/Vertex AI/Workspace，企业使用率徘徊在3%-4.5%，增长缓慢。\n\n**其他**\n\n- 英媒Guardian发布评论漫画，讽刺伦敦大都会警局使用Palantir AI技术。\n\n---\n信息来源: TechCrunch, NYTimes, Forbes, Visual Capitalist, Business Insider等"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1777165230146,
+  "lastError": "Request failed with status code 400"
+}
