@@ -1,0 +1,20 @@
+{
+  "id": "b754071e-350d-4504-ad2e-68b1ac1952b1",
+  "enqueuedAt": 1777251756810,
+  "channel": "dingtalk",
+  "to": "昭逸（非主用钉）",
+  "payloads": [
+    {
+      "text": "**AI每日资讯 - 2026年4月27日**\n\n**🔥 焦点新闻**\n\n**1️⃣ DeepSeek V4 vs GPT-5.5：中、美AI竞争加剧**\n\n- 4月24日，DeepSeek发布V4模型，仅在OpenAI发布GPT-5.5后一天\n- DeepSeek V4适配华为芯片技术，展示中国AI自主能力\n- Nvidia黄仁勋警告：DeepSeek在华为芯片上运行对美国是\"糟糕结果\"\n\n**2️⃣ 美国发全球警告：指控DeepSeek等中企窃取AI知识产权**\n\n- 美国国务院下达外交指令，要求全球关注所谓的中企AI技术盗窃\n- 指控涉及\"模型蒸馏\"(distillation)技术窃取\n- 中国驻美使馆：指控毫无根据，是对中国AI发展的刻意攻击\n\n**3️⃣ Sam Altman谈AI原则：承认\"我们会犯很多错误\"**\n\n- OpenAI发布 Sam Altman 署名文章《Our Principles》\n- 承认AI影响力巨大，\"我们会犯很多错误，但会快速学习并纠正\"\n\n**4️⃣ AI技能差距：2026年最大风险行业**\n\n- 酒店业AI技能差距得分4.02（最脆弱）\n- 医疗3.74、金融3.69、物流3.69\n- 能源和资源行业市场风险最高（3.47）\n\n**5️⃣ 马斯克预测：2040年全球10亿人形机器人**\n\n- 预计单价2-2.5万美元\n- 市场价值或达25万亿美元\n\n---\n\n*来源: Tavily*"
+    }
+  ],
+  "threadId": null,
+  "mirror": {
+    "sessionKey": "agent:main:dingtalk:direct:昭逸（非主用钉）",
+    "agentId": "main",
+    "text": "**AI每日资讯 - 2026年4月27日**\n\n**🔥 焦点新闻**\n\n**1️⃣ DeepSeek V4 vs GPT-5.5：中、美AI竞争加剧**\n\n- 4月24日，DeepSeek发布V4模型，仅在OpenAI发布GPT-5.5后一天\n- DeepSeek V4适配华为芯片技术，展示中国AI自主能力\n- Nvidia黄仁勋警告：DeepSeek在华为芯片上运行对美国是\"糟糕结果\"\n\n**2️⃣ 美国发全球警告：指控DeepSeek等中企窃取AI知识产权**\n\n- 美国国务院下达外交指令，要求全球关注所谓的中企AI技术盗窃\n- 指控涉及\"模型蒸馏\"(distillation)技术窃取\n- 中国驻美使馆：指控毫无根据，是对中国AI发展的刻意攻击\n\n**3️⃣ Sam Altman谈AI原则：承认\"我们会犯很多错误\"**\n\n- OpenAI发布 Sam Altman 署名文章《Our Principles》\n- 承认AI影响力巨大，\"我们会犯很多错误，但会快速学习并纠正\"\n\n**4️⃣ AI技能差距：2026年最大风险行业**\n\n- 酒店业AI技能差距得分4.02（最脆弱）\n- 医疗3.74、金融3.69、物流3.69\n- 能源和资源行业市场风险最高（3.47）\n\n**5️⃣ 马斯克预测：2040年全球10亿人形机器人**\n\n- 预计单价2-2.5万美元\n- 市场价值或达25万亿美元\n\n---\n\n*来源: Tavily*"
+  },
+  "retryCount": 1,
+  "lastAttemptAt": 1777251757145,
+  "lastError": "Request failed with status code 400"
+}
