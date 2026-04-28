@@ -12,17 +12,29 @@ import { createMarkdownReplyStrategy } from "./reply-strategy-markdown";
 
 // ---- Public types ------------------------------------------------
 
+type InternalReplyStrategyConfig = DingTalkConfig & {
+  /** @deprecated Internal compatibility only. Removed from public config surface. */
+  cardStreamReasoning?: boolean;
+};
+
 export interface DeliverPayload {
   text?: string;
   mediaUrls: string[];
+  /**
+   * Shared reply-runtime voice hint. Strategies forward this unchanged into the
+   * channel media delivery helper; inbound-handler is responsible for bridging
+   * legacy aliases (for example `asVoice`) into this single field.
+   */
+  audioAsVoice?: boolean;
   kind: "block" | "final" | "tool";
+  isReasoning?: boolean;
 }
 
 export interface ReplyOptions {
   disableBlockStreaming: boolean;
-  onPartialReply?: (payload: { text?: string }) => void;
-  onReasoningStream?: (payload: { text?: string }) => void;
-  onAssistantMessageStart?: () => void;
+  onPartialReply?: (payload: { text?: string }) => void | Promise<void>;
+  onReasoningStream?: (payload: { text?: string }) => void | Promise<void>;
+  onAssistantMessageStart?: () => void | Promise<void>;
 }
 
 export interface ReplyStrategy {
@@ -44,17 +56,26 @@ export interface ReplyStrategy {
 
 /** Shared context passed to every strategy implementation. */
 export interface ReplyStrategyContext {
-  config: DingTalkConfig;
+  config: InternalReplyStrategyConfig;
   to: string;
   sessionWebhook: string;
   senderId: string;
   isDirect: boolean;
   accountId: string;
   storePath: string;
+  disableBlockStreaming?: boolean;
+  sessionKey?: string;
+  sessionAgentId?: string;
   groupId?: string;
   log?: Logger;
   replyQuotedRef?: QuotedRef;
-  deliverMedia: (urls: string[]) => Promise<void>;
+  /**
+   * Channel-level media delivery hook. The `audioAsVoice` option is the same
+   * shared voice semantic carried on DeliverPayload, not a second independent
+   * config knob.
+   */
+  deliverMedia: (urls: string[], options?: { audioAsVoice?: boolean }) => Promise<void>;
+  isStopRequested?: () => boolean;
 }
 
 // ---- Factory -----------------------------------------------------

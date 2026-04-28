@@ -1,6 +1,6 @@
 {
   "name": "@soimy/dingtalk",
-  "version": "3.4.0",
+  "version": "3.5.3",
   "description": "DingTalk (钉钉) channel plugin for OpenClaw",
   "keywords": [
     "bot",
@@ -25,6 +25,7 @@
     "clawbot.plugin.json"
   ],
   "type": "module",
+  "packageManager": "pnpm@10.33.0",
   "main": "index.ts",
   "publishConfig": {
     "access": "public",
@@ -35,13 +36,17 @@
     "format:check": "oxfmt --check package.json tsconfig.json index.ts src/*.ts",
     "lint": "oxlint --type-aware index.ts src",
     "lint:fix": "oxlint --type-aware --fix index.ts src && pnpm format",
+    "docs:dev": "vitepress dev docs --host 127.0.0.1 --port 8000",
+    "docs:serv": "vitepress dev docs --host 127.0.0.1 --port 8000",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs --host 127.0.0.1 --port 4173",
     "monitor:stream": "node scripts/dingtalk-stream-monitor.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "axios": "^1.6.0",
+    "axios": "1.13.6",
     "dingtalk-stream": "^2.1.4",
     "form-data": "^4.0.0",
     "mammoth": "^1.12.0",
@@ -53,14 +58,26 @@
     "@vitest/coverage-v8": "^3.2.4",
     "oxfmt": "0.34.0",
     "oxlint": "^1.49.0",
-    "oxlint-tsgolint": "^0.15.0",
+    "oxlint-tsgolint": "^0.18.0",
     "typescript": "^5.3.0",
+    "vitepress": "1.6.4",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.2.13"
+    "openclaw": ">=2026.3.28"
+  },
+  "peerDependenciesMeta": {
+    "openclaw": {
+      "optional": true
+    }
   },
   "openclaw": {
+    "compat": {
+      "pluginApi": ">=2026.3.28"
+    },
+    "build": {
+      "openclawVersion": "2026.3.28"
+    },
     "extensions": [
       "./index.ts"
     ],
@@ -72,8 +89,8 @@
       "id": "dingtalk",
       "label": "DingTalk",
       "selectionLabel": "DingTalk (钉钉)",
-      "docsPath": "/channels/dingtalk",
-      "docsLabel": "dingtalk",
+      "docsPath": "https://soimy.github.io/openclaw-channel-dingtalk/",
+      "docsLabel": "documentation",
       "blurb": "钉钉企业内部机器人，使用 Stream 模式，无需公网 IP。",
       "order": 70,
       "aliases": [
@@ -82,6 +99,7 @@
       ]
     },
     "install": {
+      "minHostVersion": ">=2026.3.28",
       "npmSpec": "@soimy/dingtalk",
       "localPath": ".",
       "defaultChoice": "npm"

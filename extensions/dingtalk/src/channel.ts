@@ -1,9 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { DWClient, TOPIC_CARD, TOPIC_ROBOT } from "dingtalk-stream";
-import type { ChannelMessageActionAdapter, OpenClawConfig } from "openclaw/plugin-sdk";
-import * as pluginSdk from "openclaw/plugin-sdk";
+import { jsonResult } from "openclaw/plugin-sdk/channel-actions";
+import type { ChannelMessageActionAdapter } from "openclaw/plugin-sdk/channel-contract";
+import { buildChannelConfigSchema, type OpenClawConfig } from "openclaw/plugin-sdk/core";
+import { readStringParam } from "openclaw/plugin-sdk/param-readers";
+import { extractToolSend } from "openclaw/plugin-sdk/tool-send";
 import { getAccessToken } from "./auth";
 import { analyzeCardCallback } from "./card-callback-service";
+import { handleCardAction } from "./card/card-action-handler";
 import {
   createAICard,
   streamAICard,
@@ -17,20 +21,21 @@ import {
   mergeAccountWithDefaults,
   resolveGroupConfig,
   resolveRelativePath,
+  resolveRobotCode,
   stripTargetPrefix,
 } from "./config";
 import { DingTalkConfigSchema } from "./config-schema.js";
 import { ConnectionManager } from "./connection-manager";
 import { isMessageProcessed, markMessageProcessed } from "./dedup";
 import {
-  isFeedbackLearningAutoApplyEnabled,
-  isFeedbackLearningEnabled,
+  isLearningAutoApplyEnabled,
+  isLearningEnabled,
   recordExplicitFeedbackLearning,
 } from "./feedback-learning-service";
 import { handleDingTalkMessage } from "./inbound-handler";
-import { getLogger } from "./logger-context";
+import { getLogger, setCurrentLogger } from "./logger-context";
 import { prepareMediaInput, resolveOutboundMediaType } from "./media-utils";
-import { dingtalkOnboardingAdapter } from "./onboarding.js";
+import { dingtalkSetupAdapter, dingtalkSetupWizard } from "./onboarding.js";
 import { resolveOriginalPeerId, preloadPeerIdsFromSessions } from "./peer-id-registry";
 import { getDingTalkRuntime } from "./runtime";
 import {
@@ -57,11 +62,14 @@ import type {
 } from "./types";
 import { ConnectionState } from "./types";
 import {
+  closePluginDebugLog,
   cleanupOrphanedTempFiles,
   createResolve4FallbackLookup,
   formatDingTalkConnectionErrorLog,
   formatDingTalkErrorPayloadLog,
   getCurrentTimestamp,
+  parseBooleanLike,
+  resolvePluginDebugLog,
 } from "./utils";
 
 type InstrumentedDWClient = {
@@ -181,51 +189,57 @@ function logInboundCounters(log: any, accountId: string, reason: string): void {
 }
 
 function readBooleanLikeParam(params: Record<string, unknown>, key: string): boolean | undefined {
-  const value = params[key];
-  if (typeof value === "boolean") {
-    return value;
+  return parseBooleanLike(params[key]);
+}
+
+function readSharedAudioAsVoiceParam(params: Record<string, unknown>): boolean {
+  const sharedValue = readBooleanLikeParam(params, "audioAsVoice");
+  if (sharedValue !== undefined) {
+    return sharedValue;
   }
-  if (typeof value === "number") {
-    if (value === 1) {
-      return true;
-    }
-    if (value === 0) {
-      return false;
-    }
-    return undefined;
+  return readBooleanLikeParam(params, "asVoice") === true;
+}
+
+function describeDingTalkMessageTool(cfg: OpenClawConfig): {
+  actions: readonly ["send"] | readonly [];
+  capabilities: readonly ["cards"] | readonly [];
+  schema: null;
+} {
+  const config = getConfig(cfg);
+  const configured = Boolean(config.clientId && config.clientSecret);
+  if (!configured && !(config.accounts && Object.keys(config.accounts).length > 0)) {
+    return { actions: [], capabilities: [], schema: null };
   }
-  if (typeof value === "string") {
-    const normalized = value.trim().toLowerCase();
-    if (["1", "true", "yes", "y", "on"].includes(normalized)) {
-      return true;
-    }
-    if (["0", "false", "no", "n", "off"].includes(normalized)) {
-      return false;
-    }
-  }
-  return undefined;
+  const hasCardMode =
+    config.messageType === "card" ||
+    (config.accounts && Object.values(config.accounts).some((a) => a?.messageType === "card"));
+  return {
+    actions: ["send"] as const,
+    capabilities: hasCardMode ? (["cards"] as const) : [],
+    schema: null,
+  };
 }
 
 const dingtalkMessageActions: ChannelMessageActionAdapter = {
-  listActions: () => ["send"],
+  describeMessageTool: ({ cfg }) => describeDingTalkMessageTool(cfg),
   supportsAction: ({ action }) => action === "send",
-  extractToolSend: ({ args }) => pluginSdk.extractToolSend(args, "sendMessage"),
-  handleAction: async ({ action, params, cfg, accountId, dryRun }) => {
+  extractToolSend: ({ args }) => extractToolSend(args, "sendMessage"),
+  handleAction: async ({ action, params, cfg, accountId, dryRun, mediaLocalRoots }) => {
     if (action !== "send") {
       throw new Error(`Action ${action} is not supported for provider dingtalk.`);
     }
 
-    const to = pluginSdk.readStringParam(params, "to", { required: true });
+    const to = readStringParam(params, "to", { required: true });
     const mediaInput =
-      pluginSdk.readStringParam(params, "media", { trim: false }) ??
-      pluginSdk.readStringParam(params, "path", { trim: false }) ??
-      pluginSdk.readStringParam(params, "filePath", { trim: false }) ??
-      pluginSdk.readStringParam(params, "mediaUrl", { trim: false });
+      readStringParam(params, "media", { trim: false }) ??
+      readStringParam(params, "path", { trim: false }) ??
+      readStringParam(params, "filePath", { trim: false }) ??
+      readStringParam(params, "mediaUrl", { trim: false });
 
     const hasMedia = Boolean(mediaInput && mediaInput.trim());
-    const caption = pluginSdk.readStringParam(params, "caption", { allowEmpty: true }) ?? "";
+    const caption = readStringParam(params, "caption", { allowEmpty: true }) ?? "";
     let message =
-      pluginSdk.readStringParam(params, "message", {
+      readStringParam(params, "message", {
         required: !hasMedia,
         allowEmpty: true,
       }) ?? "";
@@ -234,13 +248,13 @@ const dingtalkMessageActions: ChannelMessageActionAdapter = {
       message = caption;
     }
 
-    const asVoice = readBooleanLikeParam(params, "asVoice") === true;
-    const requestedMediaType = pluginSdk.readStringParam(params, "mediaType");
+    const asVoice = readSharedAudioAsVoiceParam(params);
+    const requestedMediaType = readStringParam(params, "mediaType");
 
     const target = resolveOriginalPeerId(stripTargetPrefix(to).targetId);
 
     if (dryRun) {
-      return pluginSdk.jsonResult({
+      return jsonResult({
         ok: true,
         dryRun: true,
         to: target,
@@ -267,13 +281,14 @@ const dingtalkMessageActions: ChannelMessageActionAdapter = {
         const result = await sendProactiveMedia(config, target, mediaPath, mediaType, {
           log,
           accountId: accountId ?? undefined,
+          mediaLocalRoots: mediaLocalRoots ? [...mediaLocalRoots] : undefined,
         });
 
         if (!result.ok) {
           throw new Error(result.error || "send media failed");
         }
 
-        return pluginSdk.jsonResult({
+        return jsonResult({
           ok: true,
           to: target,
           mediaType,
@@ -305,7 +320,7 @@ const dingtalkMessageActions: ChannelMessageActionAdapter = {
     }
 
     const data = result.data as any;
-    return pluginSdk.jsonResult({
+    return jsonResult({
       ok: true,
       to: target,
       messageId: data?.processQueryKey || data?.messageId || null,
@@ -322,12 +337,13 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
     id: "dingtalk",
     label: "DingTalk",
     selectionLabel: "DingTalk (钉钉)",
-    docsPath: "/channels/dingtalk",
+    docsPath: "https://github.com/soimy/openclaw-channel-dingtalk",
     blurb: "钉钉企业内部机器人，使用 Stream 模式，无需公网 IP。",
     aliases: ["dd", "ding"],
   },
-  configSchema: pluginSdk.buildChannelConfigSchema(DingTalkConfigSchema),
-  onboarding: dingtalkOnboardingAdapter,
+  configSchema: buildChannelConfigSchema(DingTalkConfigSchema),
+  setup: dingtalkSetupAdapter,
+  setupWizard: dingtalkSetupWizard,
   capabilities: {
     chatTypes: ["direct", "group"] as Array<"direct" | "group">,
     reactions: false,
@@ -433,14 +449,15 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
       const storePath = rt.channel.session.resolveStorePath(cfg.session?.store, {
         agentId: accountId,
       });
+      const effectiveLog = getLogger(accountId) || log;
       try {
         const result = await sendMessage(config, to, text, {
-          log,
+          log: effectiveLog,
           accountId,
           storePath,
           conversationId: to,
         });
-        getLogger()?.debug?.(`[DingTalk] sendText: "${text}" result: ${JSON.stringify(result)}`);
+        effectiveLog?.debug?.(`[DingTalk] sendText: "${text}" result: ${JSON.stringify(result)}`);
         if (!result.ok) {
           throw new Error(result.error || "sendText failed");
         }
@@ -460,7 +477,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
         };
       } catch (err: any) {
         if (err?.response?.data !== undefined) {
-          log?.error?.(formatDingTalkErrorPayloadLog("outbound.sendText", err.response.data));
+          effectiveLog?.error?.(formatDingTalkErrorPayloadLog("outbound.sendText", err.response.data));
         }
         throw new Error(
           typeof err?.response?.data === "string"
@@ -477,8 +494,10 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
       filePath,
       mediaUrl,
       mediaType: providedMediaType,
+      audioAsVoice,
       asVoice,
       accountId,
+      mediaLocalRoots,
       log,
     }: any) => {
       const config = getConfig(cfg, accountId);
@@ -486,6 +505,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
       const storePath = rt.channel.session.resolveStorePath(cfg.session?.store, {
         agentId: accountId,
       });
+      const effectiveLog = getLogger(accountId) || log;
       if (!config.clientId) {
         throw new Error("DingTalk not configured");
       }
@@ -493,7 +513,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
       // Support mediaPath/filePath/mediaUrl aliases for better CLI compatibility.
       const rawMediaPath = mediaPath || filePath || mediaUrl;
 
-      getLogger()?.debug?.(
+      effectiveLog?.debug?.(
         `[DingTalk] sendMedia called: to=${to}, mediaPath=${mediaPath}, filePath=${filePath}, mediaUrl=${mediaUrl}, rawMediaPath=${rawMediaPath}`,
       );
 
@@ -511,10 +531,10 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
       let preparedMedia;
       try {
         try {
-          preparedMedia = await prepareMediaInput(rawMediaPath, log, config.mediaUrlAllowlist);
+          preparedMedia = await prepareMediaInput(rawMediaPath, effectiveLog, config.mediaUrlAllowlist);
         } catch (err: any) {
           if (err?.response?.data !== undefined) {
-            log?.error?.(
+            effectiveLog?.error?.(
               formatDingTalkErrorPayloadLog("outbound.sendMedia.prepare", err.response.data),
             );
           }
@@ -531,26 +551,27 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
           ? preparedMedia.path
           : resolveRelativePath(preparedMedia.path);
 
-        getLogger()?.debug?.(
+        effectiveLog?.debug?.(
           `[DingTalk] sendMedia resolved path: rawMediaPath=${rawMediaPath}, actualMediaPath=${actualMediaPath}`,
         );
 
         const mediaType = resolveOutboundMediaType({
           mediaType: typeof providedMediaType === "string" ? providedMediaType : undefined,
           mediaPath: actualMediaPath,
-          asVoice: asVoice === true,
+          asVoice: readSharedAudioAsVoiceParam({ audioAsVoice, asVoice }),
         });
         let result;
         try {
           result = await sendProactiveMedia(config, to, actualMediaPath, mediaType, {
-            log,
+            log: effectiveLog,
             accountId,
             storePath,
             conversationId: to,
+            mediaLocalRoots,
           });
         } catch (err: any) {
           if (err?.response?.data !== undefined) {
-            log?.error?.(
+            effectiveLog?.error?.(
               formatDingTalkErrorPayloadLog("outbound.sendMedia.send", err.response.data),
             );
           }
@@ -558,7 +579,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
             cause: err,
           });
         }
-        getLogger()?.debug?.(
+        effectiveLog?.debug?.(
           `[DingTalk] sendMedia: ${mediaType} file=${actualMediaPath} result: ${JSON.stringify(result)}`,
         );
 
@@ -580,7 +601,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
         );
       } catch (err: any) {
         if (err?.response?.data !== undefined) {
-          log?.error?.(formatDingTalkErrorPayloadLog("outbound.sendMedia", err.response.data));
+          effectiveLog?.error?.(formatDingTalkErrorPayloadLog("outbound.sendMedia", err.response.data));
         }
         throw new Error(
           typeof err?.response?.data === "string"
@@ -610,34 +631,48 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
         accountStorePath = undefined;
       }
 
-      ctx.log?.info?.(`[${account.accountId}] Initializing DingTalk Stream client...`);
+      const pluginLog = resolvePluginDebugLog({
+        accountId: account.accountId,
+        storePath: accountStorePath,
+        debug: config.debug,
+        baseLog: ctx.log,
+      });
+      setCurrentLogger(pluginLog, account.accountId);
+
+      pluginLog?.info?.(`[${account.accountId}] Initializing DingTalk Stream client...`);
 
       // Preload known peer IDs from sessions so outbound delivery (e.g. cron
       // jobs that fire immediately after startup) can resolve the original
       // case-sensitive conversationId before any inbound message has arrived.
       preloadPeerIdsFromSessions();
-      ctx.log?.debug?.(`[${account.accountId}] Peer ID registry preloaded from sessions`);
+      pluginLog?.debug?.(`[${account.accountId}] Peer ID registry preloaded from sessions`);
 
-      cleanupOrphanedTempFiles(ctx.log);
+      cleanupOrphanedTempFiles(pluginLog);
       try {
         const recovered = await recoverPendingCardsForAccount(
           config,
           account.accountId,
           accountStorePath,
-          ctx.log,
+          pluginLog,
         );
         if (recovered > 0) {
-          ctx.log?.info?.(
+          pluginLog?.info?.(
             `[${account.accountId}] Recovered and finalized ${recovered} unfinished card(s) from previous runtime`,
           );
         }
       } catch (err: any) {
-        ctx.log?.warn?.(
+        pluginLog?.warn?.(
           `[${account.accountId}] Failed to recover unfinished cards: ${err.message}`,
         );
       }
 
       const useConnectionManager = config.useConnectionManager ?? true;
+      const applyStatusPatch = (patch: Record<string, unknown>) => {
+        ctx.setStatus({
+          ...ctx.getStatus(),
+          ...patch,
+        });
+      };
 
       // Factory that creates a fresh DWClient with the TOPIC_ROBOT callback
       // already registered. Each client captures its own reference for
@@ -654,7 +689,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
         });
         (c as any).sslopts = {
           ...(c as any).sslopts,
-          lookup: createResolve4FallbackLookup(ctx.log, account.accountId),
+          lookup: createResolve4FallbackLookup(pluginLog, account.accountId),
         };
 
         instrumentConnectionStages(c);
@@ -673,15 +708,23 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
               c.socketCallBackResponse(messageId, { success: true });
               stats.acked += 1;
             } catch (ackError: any) {
-              ctx.log?.warn?.(
+              pluginLog?.warn?.(
                 `[${account.accountId}] Failed to acknowledge callback ${messageId}: ${ackError.message}`,
               );
             }
           };
           try {
             const data = JSON.parse(res.data) as DingTalkInboundMessage;
+            // Record the latest inbound callback arrival for status/UI projection.
+            // This intentionally tracks "message reached the plugin callback" rather
+            // than "message passed dedup and completed processing".
+            applyStatusPatch({
+              connected: true,
+              lastInboundAt: getCurrentTimestamp(),
+              lastEventAt: getCurrentTimestamp(),
+            });
 
-            const robotKey = config.robotCode || config.clientId || account.accountId;
+            const robotKey = resolveRobotCode(config) || account.accountId;
             const msgId = data.msgId || messageId;
             const dedupKey = msgId ? `${robotKey}:${msgId}` : undefined;
 
@@ -694,38 +737,38 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
                 accountId: account.accountId,
                 data,
                 sessionWebhook: data.sessionWebhook,
-                log: ctx.log,
+                log: pluginLog,
                 dingtalkConfig: config,
               });
               stats.processed += 1;
               if (stats.received % INBOUND_COUNTER_LOG_EVERY === 0) {
-                logInboundCounters(ctx.log, account.accountId, "periodic");
+                logInboundCounters(pluginLog, account.accountId, "periodic");
               }
               return;
             }
 
             if (isMessageProcessed(dedupKey)) {
-              ctx.log?.debug?.(`[${account.accountId}] Skipping duplicate message: ${dedupKey}`);
+              pluginLog?.debug?.(`[${account.accountId}] Skipping duplicate message: ${dedupKey}`);
               stats.dedupSkipped += 1;
               acknowledge();
-              logInboundCounters(ctx.log, account.accountId, "dedup-skipped");
+              logInboundCounters(pluginLog, account.accountId, "dedup-skipped");
               return;
             }
 
             const inflightSince = processingDedupKeys.get(dedupKey);
             if (inflightSince !== undefined) {
               if (Date.now() - inflightSince > INFLIGHT_TTL_MS) {
-                ctx.log?.warn?.(
+                pluginLog?.warn?.(
                   `[${account.accountId}] Releasing stale in-flight lock for ${dedupKey} (held ${Date.now() - inflightSince}ms > TTL ${INFLIGHT_TTL_MS}ms)`,
                 );
                 processingDedupKeys.delete(dedupKey);
               } else {
-                ctx.log?.debug?.(
+                pluginLog?.debug?.(
                   `[${account.accountId}] Skipping in-flight duplicate message: ${dedupKey}`,
                 );
                 stats.inflightSkipped += 1;
                 acknowledge();
-                logInboundCounters(ctx.log, account.accountId, "inflight-skipped");
+                logInboundCounters(pluginLog, account.accountId, "inflight-skipped");
                 return;
               }
             }
@@ -738,21 +781,21 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
                 accountId: account.accountId,
                 data,
                 sessionWebhook: data.sessionWebhook,
-                log: ctx.log,
+                log: pluginLog,
                 dingtalkConfig: config,
               });
               stats.processed += 1;
               markMessageProcessed(dedupKey);
               if (stats.received % INBOUND_COUNTER_LOG_EVERY === 0) {
-                logInboundCounters(ctx.log, account.accountId, "periodic");
+                logInboundCounters(pluginLog, account.accountId, "periodic");
               }
             } finally {
               processingDedupKeys.delete(dedupKey);
             }
           } catch (error: any) {
             stats.failed += 1;
-            logInboundCounters(ctx.log, account.accountId, "failed");
-            ctx.log?.error?.(`[${account.accountId}] Error processing message: ${error.message}`);
+            logInboundCounters(pluginLog, account.accountId, "failed");
+            pluginLog?.error?.(`[${account.accountId}] Error processing message: ${error.message}`);
           }
         });
 
@@ -765,7 +808,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
             try {
               c.socketCallBackResponse(messageId, { success: true });
             } catch (ackError: any) {
-              ctx.log?.warn?.(
+              pluginLog?.warn?.(
                 `[${account.accountId}] Failed to acknowledge card callback ${messageId}: ${ackError.message}`,
               );
             }
@@ -774,21 +817,21 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
           try {
             const payload = JSON.parse(res.data);
             const analysis = analyzeCardCallback(payload);
-            ctx.log?.info?.(
+            pluginLog?.info?.(
               `[${account.accountId}] [DingTalk][CardCallback] action=${analysis.summary} raw=${JSON.stringify(payload)}`,
             );
 
             if (analysis.feedbackTarget && analysis.feedbackAckText) {
               recordExplicitFeedbackLearning({
-                enabled: isFeedbackLearningEnabled(config),
-                autoApply: isFeedbackLearningAutoApplyEnabled(config),
+                enabled: isLearningEnabled(config),
+                autoApply: isLearningAutoApplyEnabled(config),
                 storePath: accountStorePath,
                 accountId: account.accountId,
                 targetId: analysis.feedbackTarget,
                 feedbackType: analysis.actionId === "feedback_up" ? "feedback_up" : "feedback_down",
                 userId: analysis.userId,
                 processQueryKey: analysis.processQueryKey,
-                noteTtlMs: config.learningNoteTtlMs ?? config.feedbackLearningNoteTtlMs,
+                noteTtlMs: config.learningNoteTtlMs,
               });
               try {
                 await sendProactiveTextOrMarkdown(
@@ -797,20 +840,32 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
                   analysis.feedbackAckText,
                   {
                     accountId: account.accountId,
-                    log: ctx.log,
+                    log: pluginLog,
                   },
                 );
-                ctx.log?.info?.(
+                pluginLog?.info?.(
                   `[${account.accountId}] [DingTalk][CardCallback] feedback ack sent to ${analysis.feedbackTarget}`,
                 );
               } catch (sendErr: any) {
-                ctx.log?.warn?.(
+                pluginLog?.warn?.(
                   `[${account.accountId}] [DingTalk][CardCallback] Failed to send feedback ack: ${sendErr?.message || String(sendErr)}`,
                 );
               }
             }
+            const actionResult = await handleCardAction({
+              analysis,
+              cfg,
+              accountId: account.accountId,
+              config,
+              log: pluginLog,
+            });
+            if (!actionResult.handled && analysis.actionId && analysis.actionId !== "feedback_up" && analysis.actionId !== "feedback_down") {
+              pluginLog?.debug?.(
+                `[${account.accountId}] [DingTalk][CardCallback] Unhandled actionId=${analysis.actionId}`,
+              );
+            }
           } catch (error: any) {
-            ctx.log?.error?.(
+            pluginLog?.error?.(
               `[${account.accountId}] [DingTalk][CardCallback] Failed to parse callback: ${error.message}`,
             );
           } finally {
@@ -836,15 +891,15 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
           return;
         }
         stopped = true;
-        ctx.log?.info?.(`[${account.accountId}] Stopping DingTalk Stream client...`);
+        pluginLog?.info?.(`[${account.accountId}] Stopping DingTalk Stream client...`);
         void finalizeActiveCardsForAccount(
           config,
           account.accountId,
           "⚠️ 服务正在重启，当前回复已中断。请重新发送你的问题。",
           accountStorePath,
-          ctx.log,
+          pluginLog,
         ).catch((err: any) => {
-          ctx.log?.debug?.(
+          pluginLog?.debug?.(
             `[${account.accountId}] Failed to finalize active cards during stop: ${err.message}`,
           );
         });
@@ -854,29 +909,35 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
           try {
             client.disconnect();
           } catch (err: any) {
-            ctx.log?.warn?.(`[${account.accountId}] Error during disconnect: ${err.message}`);
+            pluginLog?.warn?.(`[${account.accountId}] Error during disconnect: ${err.message}`);
           }
           nativeStopResolve?.();
         }
 
-        ctx.setStatus({
-          ...ctx.getStatus(),
+        applyStatusPatch({
           running: false,
+          connected: false,
+          lastEventAt: getCurrentTimestamp(),
           lastStopAt: getCurrentTimestamp(),
         });
 
-        ctx.log?.info?.(`[${account.accountId}] DingTalk Stream client stopped`);
+        pluginLog?.info?.(`[${account.accountId}] DingTalk Stream client stopped`);
+        closePluginDebugLog({
+          accountId: account.accountId,
+          storePath: accountStorePath,
+        });
       };
 
       if (abortSignal) {
         if (abortSignal.aborted) {
-          ctx.log?.warn?.(
+          pluginLog?.warn?.(
             `[${account.accountId}] Abort signal already active, skipping connection`,
           );
 
-          ctx.setStatus({
-            ...ctx.getStatus(),
+          applyStatusPatch({
             running: false,
+            connected: false,
+            lastEventAt: getCurrentTimestamp(),
             lastStopAt: getCurrentTimestamp(),
             lastError: "Connection aborted before start",
           });
@@ -888,7 +949,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
           if (stopped) {
             return;
           }
-          ctx.log?.info?.(
+          pluginLog?.info?.(
             `[${account.accountId}] Abort signal received, stopping DingTalk Stream client...`,
           );
           stopClient();
@@ -899,17 +960,19 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
         try {
           await client.connect();
           if (!stopped) {
-            ctx.setStatus({
-              ...ctx.getStatus(),
+            applyStatusPatch({
               running: true,
+              connected: true,
+              lastConnectedAt: getCurrentTimestamp(),
+              lastEventAt: getCurrentTimestamp(),
               lastStartAt: getCurrentTimestamp(),
               lastError: null,
             });
-            ctx.log?.info?.(`[${account.accountId}] DingTalk Stream client connected successfully`);
+            pluginLog?.info?.(`[${account.accountId}] DingTalk Stream client connected successfully`);
             await nativeStopPromise;
           }
         } catch (err: any) {
-          ctx.log?.error?.(
+          pluginLog?.error?.(
             formatDingTalkConnectionErrorLog(
               // Use connect.open as base scope; instrumentation can override to connect.websocket
               "connect.open",
@@ -917,9 +980,10 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
               `[${account.accountId}] Failed to establish connection: ${err.message}`,
             ) ?? `[${account.accountId}] Failed to establish connection: ${err.message}`,
           );
-          ctx.setStatus({
-            ...ctx.getStatus(),
+          applyStatusPatch({
             running: false,
+            connected: false,
+            lastEventAt: getCurrentTimestamp(),
             lastError: err.message || "Connection failed",
           });
           throw err;
@@ -943,13 +1007,15 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
           if (stopped) {
             return;
           }
-          ctx.log?.debug?.(
+          pluginLog?.debug?.(
             `[${account.accountId}] Connection state changed to: ${state}${error ? ` (${error})` : ""}`,
           );
           if (state === ConnectionState.CONNECTED) {
-            ctx.setStatus({
-              ...ctx.getStatus(),
+            applyStatusPatch({
               running: true,
+              connected: true,
+              lastConnectedAt: getCurrentTimestamp(),
+              lastEventAt: getCurrentTimestamp(),
               lastStartAt: getCurrentTimestamp(),
               lastError: null,
             });
@@ -957,7 +1023,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
             // Clear stale in-flight locks for this account on disconnect.
             // DingTalk will redeliver unacknowledged messages on reconnect; without
             // this cleanup the redelivered messages would be silently skipped forever.
-            const robotKey = config.robotCode || config.clientId || account.accountId;
+            const robotKey = resolveRobotCode(config) || account.accountId;
             let cleared = 0;
             for (const key of processingDedupKeys.keys()) {
               if (key.startsWith(`${robotKey}:`)) {
@@ -966,20 +1032,21 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
               }
             }
             if (cleared > 0) {
-              ctx.log?.info?.(
+              pluginLog?.info?.(
                 `[${account.accountId}] Cleared ${cleared} stale in-flight lock(s) on disconnect`,
               );
             }
-            ctx.setStatus({
-              ...ctx.getStatus(),
+            applyStatusPatch({
               running: false,
+              connected: false,
+              lastEventAt: getCurrentTimestamp(),
               lastError: error || `Connection ${state.toLowerCase()}`,
             });
           }
         },
       };
 
-      ctx.log?.debug?.(
+      pluginLog?.debug?.(
         `[${account.accountId}] Connection config: maxAttempts=${connectionConfig.maxAttempts}, ` +
           `initialDelay=${connectionConfig.initialDelay}ms, maxDelay=${connectionConfig.maxDelay}ms, ` +
           `jitter=${connectionConfig.jitter}`,
@@ -989,7 +1056,7 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
         client,
         account.accountId,
         connectionConfig,
-        ctx.log,
+        pluginLog,
         createStreamClient,
       );
 
@@ -997,23 +1064,25 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
         await connectionManager.connect();
 
         if (!stopped && connectionManager.isConnected()) {
-          ctx.setStatus({
-            ...ctx.getStatus(),
+          applyStatusPatch({
             running: true,
+            connected: true,
+            lastConnectedAt: getCurrentTimestamp(),
+            lastEventAt: getCurrentTimestamp(),
             lastStartAt: getCurrentTimestamp(),
             lastError: null,
           });
-          ctx.log?.info?.(`[${account.accountId}] DingTalk Stream client connected successfully`);
+          pluginLog?.info?.(`[${account.accountId}] DingTalk Stream client connected successfully`);
 
           await connectionManager.waitForStop();
         } else {
-          ctx.log?.info?.(
+          pluginLog?.info?.(
             `[${account.accountId}] DingTalk Stream client connect() completed but channel is ` +
               `not running (stopped=${stopped}, connected=${connectionManager.isConnected()})`,
           );
         }
       } catch (err: any) {
-        ctx.log?.error?.(
+        pluginLog?.error?.(
           formatDingTalkConnectionErrorLog(
             // Use connect.open as base scope; instrumentation can override to connect.websocket
             "connect.open",
@@ -1022,9 +1091,10 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
           ) ?? `[${account.accountId}] Failed to establish connection: ${err.message}`,
         );
 
-        ctx.setStatus({
-          ...ctx.getStatus(),
+        applyStatusPatch({
           running: false,
+          connected: false,
+          lastEventAt: getCurrentTimestamp(),
           lastError: err.message || "Connection failed",
         });
         throw err;
@@ -1041,7 +1111,10 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
     defaultRuntime: {
       accountId: "default",
       running: false,
+      connected: false,
       lastEventAt: null,
+      lastConnectedAt: null,
+      lastInboundAt: null,
       lastStartAt: null,
       lastStopAt: null,
       lastError: null,
@@ -1098,7 +1171,10 @@ export const dingtalkPlugin: DingTalkChannelPlugin = {
         configured: account.configured,
         clientId: account.config?.clientId ?? null,
         running,
+        connected: runtime?.connected ?? snapshot?.connected ?? null,
         lastEventAt: running ? getCurrentTimestamp() : persistedLastEventAt,
+        lastConnectedAt: runtime?.lastConnectedAt ?? snapshot?.lastConnectedAt ?? null,
+        lastInboundAt: runtime?.lastInboundAt ?? snapshot?.lastInboundAt ?? null,
         lastStartAt: runtime?.lastStartAt ?? snapshot?.lastStartAt ?? null,
         lastStopAt: runtime?.lastStopAt ?? snapshot?.lastStopAt ?? null,
         lastError: runtime?.lastError ?? snapshot?.lastError ?? null,

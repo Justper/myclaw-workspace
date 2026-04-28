@@ -27,3 +27,4 @@ agents/
 # 防止 submodule 问题
 **/.git
 **/.gitignore
+plugin-runtime-deps/

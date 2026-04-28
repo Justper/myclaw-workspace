@@ -7,16 +7,27 @@
  * (channel + accountId + peer), not content-based dynamic routing.
  */
 
-import type { OpenClawConfig } from "openclaw/plugin-sdk";
+import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
+import { maybeResolveTextAlias } from "openclaw/plugin-sdk/command-auth";
 import { resolveAtAgents } from "./agent-name-matcher";
+import { resolveRobotCode } from "../config";
 import { parseLearnCommand } from "../learning-command-service";
 import { getDingTalkRuntime } from "../runtime";
 import { sendBySession } from "../send-service";
+import { getErrorMessage } from "../utils";
 import type { AgentNameMatch, DingTalkConfig, DingTalkInboundMessage, HandleDingTalkMessageParams, Logger, MessageContent } from "../types";
+
+export class HostRoutingHelperUnavailableError extends Error {
+  constructor(message = "DingTalk sub-agent routing requires runtime.channel.routing.buildAgentSessionKey from the host runtime.") {
+    super(message);
+    this.name = "HostRoutingHelperUnavailableError";
+  }
+}
 
 /**
  * Build a session key for a specific agent using the runtime API.
- * Falls back to framework's resolveAgentRoute if buildAgentSessionKey is unavailable.
+ * On supported host versions, sub-agent routing must use the shared helper
+ * instead of synthesizing plugin-local fallback keys.
  */
 export function buildAgentSessionKey(params: {
   rt: ReturnType<typeof getDingTalkRuntime>;
@@ -28,31 +39,19 @@ export function buildAgentSessionKey(params: {
 }): string {
   const { rt, cfg, accountId, agentId, peerKind, peerId } = params;
   const routing = rt.channel.routing as Record<string, unknown>;
-  if (typeof routing.buildAgentSessionKey === "function") {
-    return (
-      (routing.buildAgentSessionKey as (p: unknown) => string)({
-        agentId,
-        channel: "dingtalk",
-        accountId,
-        peer: { kind: peerKind, id: peerId },
-        dmScope: cfg.session?.dmScope,
-        identityLinks: cfg.session?.identityLinks,
-      })
-    ).toLowerCase();
+  if (typeof routing.buildAgentSessionKey !== "function") {
+    throw new HostRoutingHelperUnavailableError();
   }
-  // Fallback: derive a session key with agentId suffix to ensure isolation.
-  // resolveAgentRoute routes to the default agent, so we append the target
-  // agentId to prevent session key collisions between sub-agents.
-  // @migration-note: When SDK exposes buildAgentSessionKey in type definitions,
-  // sessions created via this fallback path will become orphaned. Remove this
-  // fallback and the typeof check once the SDK is updated.
-  const fallbackRoute = rt.channel.routing.resolveAgentRoute({
-    cfg,
-    channel: "dingtalk",
-    accountId,
-    peer: { kind: peerKind, id: peerId },
-  });
-  return `${fallbackRoute.sessionKey}:subagent:${agentId}`;
+  return (
+    (routing.buildAgentSessionKey as (p: unknown) => string)({
+      agentId,
+      channel: "dingtalk",
+      accountId,
+      peer: { kind: peerKind, id: peerId },
+      dmScope: cfg.session?.dmScope,
+      identityLinks: cfg.session?.identityLinks,
+    })
+  ).toLowerCase();
 }
 
 /**
@@ -65,7 +64,12 @@ function sanitizeAgentName(name: string): string {
 }
 
 /**
- * Resolve @mention-based sub-agent routing for a group message.
+ * Resolve @mention-based sub-agent routing for a group or direct message.
+ *
+ * In group chats, @mentions are populated by the DingTalk SDK (atMentions field).
+ * In direct messages (DM), the SDK also populates atMentions for text-type messages
+ * via extractMessageContent in message-utils.ts, so the same field is reused here.
+ * The !isGroup guard is removed to enable sub-agent routing in DM as well.
  *
  * Returns matched agents if any @mentions resolve to configured agents,
  * or null if the message should be handled by the default agent.
@@ -85,18 +89,24 @@ export async function resolveSubAgentRoute(params: {
   const { extractedContent, cfg, isGroup, dingtalkConfig, sessionWebhook, senderId, log } = params;
 
   const atMentions = extractedContent.atMentions || [];
-  const atUserDingtalkIds = extractedContent.atUserDingtalkIds;
-  // Strip quoted prefix before checking /learn to avoid false positives
-  // when the quoted message itself contains a /learn command.
+  // DM has no @picker list from DingTalk; only group chats provide atUsers for real-user hints.
+  const atUserDingtalkIds = isGroup ? extractedContent.atUserDingtalkIds : undefined;
+  // Strip quoted prefix before checking commands to avoid false positives
+  // when the quoted message itself contains a command.
   const textForCommandCheck = extractedContent.text.replace(/^\[引用[^\]]*\]\s*/, "");
   const isLearnCommand = parseLearnCommand(textForCommandCheck).scope !== "unknown";
+  // Slash commands like /new, /stop, /reasoning etc. must bypass sub-agent
+  // routing so they reach the framework's own command handling layer.
+  // Strip leading @mention tokens first since DM text may look like "@Agent /new".
+  const textWithoutMentions = textForCommandCheck.replace(/^(?:@\S+\s+)*/u, "").trim();
+  const isSlashCommand = maybeResolveTextAlias(textWithoutMentions, cfg) !== null;
 
   if (
-    !isGroup ||
     atMentions.length === 0 ||
     !cfg.agents?.list ||
     cfg.agents.list.length === 0 ||
-    isLearnCommand
+    isLearnCommand ||
+    isSlashCommand
   ) {
     return null;
   }
@@ -114,12 +124,12 @@ export async function resolveSubAgentRoute(params: {
   if (hasInvalidAgentNames) {
     const fallbackReason = `未找到名为"${unmatchedNames.join("、")}"的助手`;
     try {
+      const sendOptions = isGroup ? { atUserId: senderId, log } : { log };
       await sendBySession(dingtalkConfig, sessionWebhook, `⚠️ ${fallbackReason}`, {
-        atUserId: senderId,
-        log,
+        ...sendOptions,
       });
-    } catch (err: any) {
-      log?.debug?.(`[DingTalk] Failed to send fallback notice: ${err.message}`);
+    } catch (err: unknown) {
+      log?.debug?.(`[DingTalk] Failed to send fallback notice: ${getErrorMessage(err)}`);
     }
   }
 
@@ -149,12 +159,13 @@ export async function dispatchSubAgents(params: {
 
   // Pre-download media once to avoid duplication across sub-agents
   let preDownloadedMedia: { mediaPath?: string; mediaType?: string } | undefined;
-  if (extractedContent.mediaPath && dingtalkConfig.robotCode) {
+  if (extractedContent.mediaPath && resolveRobotCode(dingtalkConfig)) {
     const media = await download(dingtalkConfig, extractedContent.mediaPath, log);
     if (media) {
       preDownloadedMedia = { mediaPath: media.path, mediaType: media.mimeType };
     }
   }
+  let helperMissingWarningSent = false;
 
   for (const agentMatch of matchedAgents) {
     try {
@@ -167,15 +178,33 @@ export async function dispatchSubAgents(params: {
         dingtalkConfig,
         subAgentOptions: {
           agentId: agentMatch.agentId,
-          responsePrefix: `[${sanitizeAgentName(agentMatch.matchedName)}] `,
+          responsePrefix: `> 🤖 **${sanitizeAgentName(agentMatch.matchedName)}**:\n\n`,
           matchedName: agentMatch.matchedName,
         },
         preDownloadedMedia,
       });
     } catch (error) {
+      const message = getErrorMessage(error);
       log?.error?.(
-        `[DingTalk] Sub-agent ${agentMatch.agentId} failed: ${error instanceof Error ? error.message : String(error)}`,
+        `[DingTalk] Sub-agent ${agentMatch.agentId} failed: ${message}`,
       );
+      if (error instanceof HostRoutingHelperUnavailableError && !helperMissingWarningSent) {
+        helperMissingWarningSent = true;
+        try {
+          const isGroup = data.conversationType !== "1";
+          const sendOptions = isGroup ? { atUserId: data.senderId, log } : { log };
+          await sendBySession(
+            dingtalkConfig,
+            sessionWebhook,
+            "⚠️ 当前宿主版本不支持 DingTalk 子助手路由所需的 session helper，请升级 OpenClaw 后重试。",
+            sendOptions,
+          );
+        } catch (notifyError: unknown) {
+          log?.debug?.(
+            `[DingTalk] Failed to send sub-agent helper-missing notice: ${getErrorMessage(notifyError)}`,
+          );
+        }
+      }
     }
   }
 }

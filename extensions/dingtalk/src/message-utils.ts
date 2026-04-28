@@ -98,6 +98,15 @@ function extractRichTextQuoteParts(
   };
 }
 
+function extractAtMentionsFromText(text: string): AtMention[] {
+  const mentions: AtMention[] = [];
+  const matches = text.matchAll(/(?<!\w)@([^\s@.]+)(?!\.\w)/g);
+  for (const match of matches) {
+    mentions.push({ name: match[1].trim() });
+  }
+  return mentions;
+}
+
 function trimString(value: string | undefined): string | undefined {
   if (typeof value !== "string") {
     return undefined;
@@ -188,6 +197,18 @@ function buildRepliedMessagePreview(params: {
     };
   }
 
+  if (repliedMsgType === "file" || repliedMsgType === "audio" || repliedMsgType === "video") {
+    const hasFileName = repliedMsgType === "file";
+    return {
+      isQuotedFile: true,
+      fileCreatedAt: repliedMsg.createdAt,
+      previewText: buildQuotedMessageTypePlaceholder(repliedMsgType, hasFileName ? fileName : undefined),
+      previewMessageType: repliedMsgType,
+      ...(hasFileName ? { previewFileName: fileName } : {}),
+      previewSenderId: trimString(repliedMsg.senderId),
+    };
+  }
+
   if (repliedMsgType === "interactiveCard") {
     const isBotCard = repliedMsg.senderId === data.chatbotUserId;
     if (isBotCard) {
@@ -209,6 +230,17 @@ function buildRepliedMessagePreview(params: {
         trimString(content?.text) ||
         buildQuotedMessageTypePlaceholder(docMeta ? "interactiveCardFile" : "interactiveCard"),
       previewMessageType: docMeta ? "interactiveCardFile" : "interactiveCard",
+      previewSenderId: trimString(repliedMsg.senderId),
+    };
+  }
+
+  if (repliedMsgType === "chatRecord") {
+    const summary = typeof content?.summary === "string" ? content.summary.trim() : "";
+    const title = typeof content?.title === "string" ? content.title.trim() : "";
+    const chatRecordLabel = title ? `[${title}] ` : "[聊天记录] ";
+    return {
+      previewText: summary ? `${chatRecordLabel}${summary}` : buildQuotedMessageTypePlaceholder("chatRecord"),
+      previewMessageType: "chatRecord",
       previewSenderId: trimString(repliedMsg.senderId),
     };
   }
@@ -369,6 +401,16 @@ export function extractMessageContent(data: DingTalkInboundMessage): MessageCont
         };
       }
 
+      if (repliedMsgType === "file" || repliedMsgType === "audio" || repliedMsgType === "video") {
+        return {
+          isQuotedFile: true,
+          fileCreatedAt: repliedMsg.createdAt,
+          fileDownloadCode: trimString(content?.downloadCode),
+          msgId: repliedMsgId,
+          ...repliedPreview,
+        };
+      }
+
       if (repliedMsgType === "interactiveCard") {
         const isBotCard = repliedMsg.senderId === data.chatbotUserId;
         if (isBotCard) {
@@ -436,14 +478,10 @@ export function extractMessageContent(data: DingTalkInboundMessage): MessageCont
 
     // Strip quoted prefix before extracting @mentions to avoid matching @names inside quotes.
     const textForAtExtraction = textContent.replace(/^\[引用[^\]]*\]\s*/, "");
-    // Match @name but exclude email-like patterns (user@domain.com) and emoji (@_@).
-    const atMatches = textForAtExtraction.matchAll(/(?<!\w)@([^\s@.]+)(?!\.\w)/g);
-    for (const match of atMatches) {
-      atMentions.push({ name: match[1].trim() });
-    }
+    atMentions.push(...extractAtMentionsFromText(textForAtExtraction));
 
     return {
-      text: textContent,
+      text: textContent || quoted?.previewText || "",
       messageType: "text",
       quoted: quoted ?? undefined,
       atMentions,
@@ -526,6 +564,18 @@ export function extractMessageContent(data: DingTalkInboundMessage): MessageCont
       mediaPath: data.content?.downloadCode,
       mediaType: "file",
       messageType: "file",
+      atMentions,
+      atUserDingtalkIds,
+    };
+  }
+
+  if (msgtype === "markdown") {
+    const mdText = typeof data.content?.text === "string" ? data.content.text.trim() : "";
+    atMentions.push(...extractAtMentionsFromText(mdText));
+    return {
+      text: mdText || "[markdown消息]",
+      messageType: "markdown",
+      quoted: quoted ?? undefined,
       atMentions,
       atUserDingtalkIds,
     };

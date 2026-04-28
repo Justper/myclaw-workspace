@@ -1,6 +1,6 @@
 import * as os from "node:os";
 import * as path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk";
+import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
 import type { DingTalkConfig } from "./types";
 
 const WINDOWS_ROOT_DIRECTORIES = new Set([
@@ -17,17 +17,44 @@ function normalizeLearningConfig(
   config: DingTalkConfig,
   options: { applyDefaults: boolean },
 ): DingTalkConfig {
-  const learningEnabled = config.learningEnabled ?? config.feedbackLearningEnabled;
-  const learningAutoApply = config.learningAutoApply ?? config.feedbackLearningAutoApply;
-  const learningNoteTtlMs = config.learningNoteTtlMs ?? config.feedbackLearningNoteTtlMs;
   return {
     ...config,
-    learningEnabled: options.applyDefaults ? learningEnabled ?? false : learningEnabled,
-    learningAutoApply: options.applyDefaults ? learningAutoApply ?? false : learningAutoApply,
+    learningEnabled: options.applyDefaults ? config.learningEnabled ?? false : config.learningEnabled,
+    learningAutoApply: options.applyDefaults
+      ? config.learningAutoApply ?? false
+      : config.learningAutoApply,
     learningNoteTtlMs: options.applyDefaults
-      ? learningNoteTtlMs ?? DEFAULT_LEARNING_NOTE_TTL_MS
-      : learningNoteTtlMs,
+      ? config.learningNoteTtlMs ?? DEFAULT_LEARNING_NOTE_TTL_MS
+      : config.learningNoteTtlMs,
+    cardStreamingMode: options.applyDefaults
+      ? (config.cardStreamingMode ?? (config.cardRealTimeStream === true ? "all" : "off"))
+      : config.cardStreamingMode,
   };
+}
+
+function stripRemovedLegacyFields(config: DingTalkConfig): DingTalkConfig {
+  const {
+    verboseRealtimeStream: _verboseRealtimeStream,
+    cardStreamReasoning: _cardStreamReasoning,
+    accounts,
+    ...rest
+  } = config as DingTalkConfig & {
+    verboseRealtimeStream?: unknown;
+    cardStreamReasoning?: unknown;
+    accounts?: Record<string, DingTalkConfig | undefined>;
+  };
+  const sanitizedAccounts = accounts
+    ? Object.fromEntries(
+        Object.entries(accounts).map(([accountId, accountConfig]) => [
+          accountId,
+          accountConfig ? stripRemovedLegacyFields(accountConfig) : accountConfig,
+        ]),
+      )
+    : undefined;
+  if (sanitizedAccounts) {
+    return { ...rest, accounts: sanitizedAccounts } as DingTalkConfig;
+  }
+  return rest as DingTalkConfig;
 }
 
 /**
@@ -38,8 +65,12 @@ export function mergeAccountWithDefaults(
   channelCfg: DingTalkConfig,
   accountCfg: DingTalkConfig,
 ): DingTalkConfig {
-  const { accounts: _accounts, ...defaults } = channelCfg;
-  const normalizedAccountCfg = normalizeLearningConfig(accountCfg, { applyDefaults: false });
+  const { accounts: _accounts, ...defaultCandidate } =
+    channelCfg as DingTalkConfig & { accounts?: unknown; verboseRealtimeStream?: unknown };
+  const defaults = stripRemovedLegacyFields(defaultCandidate as DingTalkConfig);
+  const normalizedAccountCfg = stripRemovedLegacyFields(
+    normalizeLearningConfig(accountCfg, { applyDefaults: false }),
+  );
   const overrides: Partial<DingTalkConfig> = {};
   for (const [key, value] of Object.entries(normalizedAccountCfg)) {
     if (value !== undefined) {
@@ -71,14 +102,14 @@ export function getConfig(cfg: OpenClawConfig, accountId?: string): DingTalkConf
   }
 
   if (accountId) {
-    return normalizeLearningConfig(dingtalkCfg, { applyDefaults: true });
+    return stripRemovedLegacyFields(normalizeLearningConfig(dingtalkCfg, { applyDefaults: true }));
   }
 
   if (dingtalkCfg.accounts && Object.keys(dingtalkCfg.accounts).length > 0) {
-    return dingtalkCfg;
+    return stripRemovedLegacyFields(dingtalkCfg);
   }
 
-  return normalizeLearningConfig(dingtalkCfg, { applyDefaults: true });
+  return stripRemovedLegacyFields(normalizeLearningConfig(dingtalkCfg, { applyDefaults: true }));
 }
 
 export function isConfigured(cfg: OpenClawConfig, accountId?: string): boolean {
@@ -141,6 +172,14 @@ export function resolveRelativePath(input: string): string {
 }
 
 export const resolveUserPath = resolveRelativePath;
+
+/**
+ * Resolve the robot code used by DingTalk APIs.
+ * DingTalk robotCode is always equal to clientId; this helper trims whitespace.
+ */
+export function resolveRobotCode(config: Pick<DingTalkConfig, "clientId">): string {
+  return (config.clientId || "").trim();
+}
 
 export function resolveGroupConfig(
   cfg: DingTalkConfig,

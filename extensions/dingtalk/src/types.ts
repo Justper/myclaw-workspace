@@ -10,27 +10,23 @@
  */
 
 import type {
+  ChannelPlugin as SDKChannelPlugin,
   OpenClawConfig,
-  OpenClawPluginApi,
-  ChannelLogSink as SDKChannelLogSink,
+} from "openclaw/plugin-sdk/core";
+import type {
   ChannelAccountSnapshot as SDKChannelAccountSnapshot,
   ChannelGatewayContext as SDKChannelGatewayContext,
-  ChannelPlugin as SDKChannelPlugin,
-} from "openclaw/plugin-sdk";
+  ChannelLogSink as SDKChannelLogSink,
+} from "openclaw/plugin-sdk/channel-runtime";
+import type { ChannelSetupWizard } from "openclaw/plugin-sdk/setup";
 import { mergeAccountWithDefaults } from "./config";
 
 export type AckReactionMode = "off" | "emoji" | "kaomoji";
 // Accept arbitrary strings for backward compatibility; the recommended
 // explicit modes remain: "off" | "emoji" | "kaomoji".
 export type AckReactionConfigValue = string;
-
-export interface DingtalkPluginModule {
-  id: string;
-  name: string;
-  description?: string;
-  configSchema?: unknown;
-  register?: (api: OpenClawPluginApi) => void | Promise<void>;
-}
+export type CardStreamingMode = "off" | "answer" | "all";
+export type ContextVisibilityMode = "all" | "allowlist" | "allowlist_quote";
 
 /**
  * DingTalk channel configuration (extends base OpenClaw config)
@@ -38,9 +34,6 @@ export interface DingtalkPluginModule {
 export interface DingTalkConfig extends OpenClawConfig {
   clientId: string;
   clientSecret: string;
-  robotCode?: string;
-  corpId?: string;
-  agentId?: string;
   name?: string;
   enabled?: boolean;
   dmPolicy?: "open" | "pairing" | "allowlist";
@@ -48,12 +41,15 @@ export interface DingTalkConfig extends OpenClawConfig {
   allowFrom?: string[];
   groupAllowFrom?: string[];
   displayNameResolution?: "disabled" | "all";
+  contextVisibility?: ContextVisibilityMode;
   mediaUrlAllowlist?: string[];
   journalTTLDays?: number;
   ackReaction?: AckReactionConfigValue;
   debug?: boolean;
   messageType?: "markdown" | "card";
+  /** @deprecated 已固定使用内置模板契约 */
   cardTemplateId?: string;
+  /** @deprecated 已固定使用内置模板契约 */
   cardTemplateKey?: string;
   groups?: Record<string, { systemPrompt?: string; requireMention?: boolean; groupAllowFrom?: string[] }>;
   accounts?: Record<string, DingTalkConfig>;
@@ -78,8 +74,15 @@ export interface DingTalkConfig extends OpenClawConfig {
     enabled?: boolean;
     cooldownHours?: number;
   };
-  /** Enable real-time card streaming (default false, true = 300ms throttled per-token updates) */
+  /** Card streaming mode.
+   *  - off: disable incremental streaming
+   *  - answer: stream answer text
+   *  - all: stream answer + reasoning text */
+  cardStreamingMode?: CardStreamingMode;
+  /** @deprecated Use `cardStreamingMode` instead. */
   cardRealTimeStream?: boolean;
+  /** Throttle interval in ms for card stream updates (default 1000) */
+  cardStreamInterval?: number;
   /** AICard degrade duration in milliseconds after trigger errors (default 30m) */
   aicardDegradeMs?: number;
   /** Enable local learning loop (events/reflections/session notes/global rules) */
@@ -88,12 +91,6 @@ export interface DingTalkConfig extends OpenClawConfig {
   learningAutoApply?: boolean;
   /** Session learning note TTL in milliseconds (default 6h) */
   learningNoteTtlMs?: number;
-  /** @deprecated Use learningEnabled */
-  feedbackLearningEnabled?: boolean;
-  /** @deprecated Use learningAutoApply */
-  feedbackLearningAutoApply?: boolean;
-  /** @deprecated Use learningNoteTtlMs */
-  feedbackLearningNoteTtlMs?: number;
   /** Whether to convert markdown tables to plain text for better rendering on some clients (default: true) */
   convertMarkdownTables?: boolean;
   /** @mention the sender after card finalization in group chats; value is the message text */
@@ -107,21 +104,21 @@ export interface DingTalkChannelConfig {
   enabled?: boolean;
   clientId: string;
   clientSecret: string;
-  robotCode?: string;
-  corpId?: string;
-  agentId?: string;
   name?: string;
   dmPolicy?: "open" | "pairing" | "allowlist";
   groupPolicy?: "open" | "allowlist" | "disabled";
   allowFrom?: string[];
   groupAllowFrom?: string[];
   displayNameResolution?: "disabled" | "all";
+  contextVisibility?: ContextVisibilityMode;
   mediaUrlAllowlist?: string[];
   journalTTLDays?: number;
   ackReaction?: AckReactionConfigValue;
   debug?: boolean;
   messageType?: "markdown" | "card";
+  /** @deprecated 已固定使用内置模板契约 */
   cardTemplateId?: string;
+  /** @deprecated 已固定使用内置模板契约 */
   cardTemplateKey?: string;
   groups?: Record<string, { systemPrompt?: string; requireMention?: boolean; groupAllowFrom?: string[] }>;
   accounts?: Record<string, DingTalkConfig>;
@@ -145,8 +142,15 @@ export interface DingTalkChannelConfig {
     enabled?: boolean;
     cooldownHours?: number;
   };
-  /** Enable real-time card streaming (default false, true = 300ms throttled per-token updates) */
+  /** Card streaming mode.
+   *  - off: disable incremental streaming
+   *  - answer: stream answer text
+   *  - all: stream answer + reasoning text */
+  cardStreamingMode?: CardStreamingMode;
+  /** @deprecated Use `cardStreamingMode` instead. */
   cardRealTimeStream?: boolean;
+  /** Throttle interval in ms for card stream updates (default 1000) */
+  cardStreamInterval?: number;
   /** AICard degrade duration in milliseconds after trigger errors (default 30m) */
   aicardDegradeMs?: number;
   /** Enable local learning loop (events/reflections/session notes/global rules) */
@@ -155,12 +159,6 @@ export interface DingTalkChannelConfig {
   learningAutoApply?: boolean;
   /** Session learning note TTL in milliseconds (default 6h) */
   learningNoteTtlMs?: number;
-  /** @deprecated Use learningEnabled */
-  feedbackLearningEnabled?: boolean;
-  /** @deprecated Use learningAutoApply */
-  feedbackLearningAutoApply?: boolean;
-  /** @deprecated Use learningNoteTtlMs */
-  feedbackLearningNoteTtlMs?: number;
   /** Whether to convert markdown tables to plain text for better rendering on some clients (default: true) */
   convertMarkdownTables?: boolean;
   /** @mention the sender after card finalization in group chats; value is the message text */
@@ -254,6 +252,10 @@ export interface DingTalkInboundMessage {
           atName?: string;
           downloadCode?: string;
         }>;
+        /** chatRecord 消息摘要 */
+        summary?: string;
+        /** chatRecord 消息标题 */
+        title?: string;
       };
     };
   };
@@ -263,6 +265,8 @@ export interface DingTalkInboundMessage {
     recognition?: string;
     spaceId?: string;
     fileId?: string;
+    text?: string;
+    title?: string;
     biz_custom_action_url?: string;
     richText?: Array<{
       type: string;
@@ -319,6 +323,7 @@ export interface QuotedInfo {
   cardCreatedAt?: number;
   processQueryKey?: string;
   fileCreatedAt?: number;
+  fileDownloadCode?: string;
   msgId?: string;
   previewText?: string;
   previewMessageType?: string;
@@ -393,6 +398,8 @@ export interface SendMessageOptions {
   /** Force markdown/text delivery even when messageType is "card". Bypasses card
    *  creation while preserving journal writes and other side-effects. */
   forceMarkdown?: boolean;
+  /** Allowed local roots for sandbox/container media path resolution. */
+  mediaLocalRoots?: string[];
 }
 
 export interface DingTalkTrackingMetadata {
@@ -579,7 +586,9 @@ export interface GatewayStopResult {
 /**
  * DingTalk channel plugin definition
  */
-export type DingTalkChannelPlugin = SDKChannelPlugin<ResolvedAccount & { configured: boolean }>;
+export type DingTalkChannelPlugin = SDKChannelPlugin<ResolvedAccount & { configured: boolean }> & {
+  setupWizard?: ChannelSetupWizard;
+};
 
 /**
  * Result of target resolution validation
@@ -637,6 +646,7 @@ export const AICardStatus = {
   PROCESSING: "1",
   INPUTING: "2",
   FINISHED: "3",
+  STOPPED: "4",
   FAILED: "5",
 } as const;
 
@@ -658,7 +668,7 @@ export interface AICardInstance {
   storePath?: string;
   createdAt: number;
   lastUpdated: number;
-  state: AICardState; // Current card state: PROCESSING, INPUTING, FINISHED, FAILED
+  state: AICardState; // Current card state: PROCESSING, INPUTING, FINISHED, STOPPED, FAILED
   config?: DingTalkConfig; // Store config reference for token refresh
   lastStreamedContent?: string;
   outTrackId?: string;
@@ -726,6 +736,33 @@ export interface ConnectionAttemptResult {
 
 const DEFAULT_ACCOUNT_ID = "default";
 
+function stripRemovedLegacyFieldsFromPublicAccount(
+  config: DingTalkConfig,
+): DingTalkConfig {
+  const {
+    cardStreamReasoning: _cardStreamReasoning,
+    verboseRealtimeStream: _verboseRealtimeStream,
+    accounts,
+    ...rest
+  } = config as DingTalkConfig & {
+    cardStreamReasoning?: unknown;
+    verboseRealtimeStream?: unknown;
+    accounts?: Record<string, DingTalkConfig | undefined>;
+  };
+  const sanitizedAccounts = accounts
+    ? Object.fromEntries(
+        Object.entries(accounts).map(([accountId, accountConfig]) => [
+          accountId,
+          accountConfig ? stripRemovedLegacyFieldsFromPublicAccount(accountConfig) : accountConfig,
+        ]),
+      )
+    : undefined;
+  if (sanitizedAccounts) {
+    return { ...rest, accounts: sanitizedAccounts } as DingTalkConfig;
+  }
+  return rest as DingTalkConfig;
+}
+
 /**
  * List all DingTalk account IDs from config
  */
@@ -770,12 +807,9 @@ export function resolveDingTalkAccount(
 
   // If default account, return top-level config
   if (id === DEFAULT_ACCOUNT_ID) {
-    const config: DingTalkConfig = {
+    const rawConfig: DingTalkConfig = {
       clientId: dingtalk?.clientId ?? "",
       clientSecret: dingtalk?.clientSecret ?? "",
-      robotCode: dingtalk?.robotCode,
-      corpId: dingtalk?.corpId,
-      agentId: dingtalk?.agentId,
       name: dingtalk?.name,
       enabled: dingtalk?.enabled,
       dmPolicy: dingtalk?.dmPolicy,
@@ -783,6 +817,7 @@ export function resolveDingTalkAccount(
       allowFrom: dingtalk?.allowFrom,
       groupAllowFrom: dingtalk?.groupAllowFrom,
       displayNameResolution: dingtalk?.displayNameResolution,
+      contextVisibility: dingtalk?.contextVisibility,
       journalTTLDays: dingtalk?.journalTTLDays,
       ackReaction: dingtalk?.ackReaction,
       debug: dingtalk?.debug,
@@ -802,17 +837,17 @@ export function resolveDingTalkAccount(
       keepAlive: dingtalk?.keepAlive,
       bypassProxyForSend: dingtalk?.bypassProxyForSend,
       proactivePermissionHint: dingtalk?.proactivePermissionHint,
+      cardStreamingMode: dingtalk?.cardStreamingMode,
       cardRealTimeStream: dingtalk?.cardRealTimeStream,
+      cardStreamInterval: dingtalk?.cardStreamInterval,
       aicardDegradeMs: dingtalk?.aicardDegradeMs,
-      learningEnabled: dingtalk?.learningEnabled ?? dingtalk?.feedbackLearningEnabled,
-      learningAutoApply: dingtalk?.learningAutoApply ?? dingtalk?.feedbackLearningAutoApply,
-      learningNoteTtlMs: dingtalk?.learningNoteTtlMs ?? dingtalk?.feedbackLearningNoteTtlMs,
-      feedbackLearningEnabled: dingtalk?.feedbackLearningEnabled,
-      feedbackLearningAutoApply: dingtalk?.feedbackLearningAutoApply,
-      feedbackLearningNoteTtlMs: dingtalk?.feedbackLearningNoteTtlMs,
+      learningEnabled: dingtalk?.learningEnabled,
+      learningAutoApply: dingtalk?.learningAutoApply,
+      learningNoteTtlMs: dingtalk?.learningNoteTtlMs,
       convertMarkdownTables: dingtalk?.convertMarkdownTables,
       cardAtSender: dingtalk?.cardAtSender,
     };
+    const config = stripRemovedLegacyFieldsFromPublicAccount(rawConfig);
     return {
       ...config,
       accountId: id,
@@ -827,8 +862,9 @@ export function resolveDingTalkAccount(
       dingtalk as DingTalkConfig,
       accountConfig,
     );
+    const publicMerged = stripRemovedLegacyFieldsFromPublicAccount(merged);
     return {
-      ...merged,
+      ...publicMerged,
       accountId: id,
       configured: Boolean(merged.clientId && merged.clientSecret),
     };

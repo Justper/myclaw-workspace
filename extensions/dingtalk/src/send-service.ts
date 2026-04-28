@@ -1,16 +1,20 @@
 import * as path from "node:path";
-import axios from "axios";
+import axios from "./http-client";
 import { getAccessToken } from "./auth";
 import {
   isCardInTerminalState,
   sendProactiveCardText,
-  streamAICard,
 } from "./card-service";
-import { stripTargetPrefix } from "./config";
+import { resolveRobotCode, stripTargetPrefix } from "./config";
 import { getLogger } from "./logger-context";
 import { getVoiceDurationMs, uploadMedia as uploadMediaUtil } from "./media-utils";
 import { convertMarkdownTablesToPlainText, detectMarkdownAndExtractTitle } from "./message-utils";
-import { DEFAULT_MESSAGE_CONTEXT_TTL_DAYS, upsertOutboundMessageContext } from "./message-context-store";
+import {
+  DEFAULT_MESSAGE_CONTEXT_TTL_DAYS,
+  DEFAULT_OUTBOUND_SENDER,
+  inferConversationChatType,
+  upsertOutboundMessageContext,
+} from "./message-context-store";
 import { resolveOriginalPeerId } from "./peer-id-registry";
 import {
   deleteProactiveRiskObservation,
@@ -18,6 +22,7 @@ import {
   recordProactiveRiskObservation,
 } from "./proactive-risk-registry";
 import { formatDingTalkErrorPayloadLog, getProxyBypassOption } from "./utils";
+import type { UploadMediaResult } from "./media-utils";
 import type {
   AICardInstance,
   AxiosResponse,
@@ -29,9 +34,55 @@ import type {
   SendMessageOptions,
   SessionWebhookResponse,
 } from "./types";
-import { AICardStatus } from "./types";
 
 export { detectMediaTypeFromExtension } from "./media-utils";
+
+const MARKDOWN_LOCAL_IMAGE_RE =
+  /!\[([^\]]*)\]\((file:\/\/\/[^)]+|\/(?:tmp|var|private|Users|home|root)[^)]+|[A-Za-z]:[\\/][^)]+)\)/g;
+
+function decodeMarkdownLocalImagePath(rawPath: string): string {
+  const unescapedPath = rawPath.replace(/\\ /g, " ");
+  if (unescapedPath.startsWith("file://")) {
+    try {
+      return decodeURIComponent(unescapedPath.replace("file://", ""));
+    } catch {
+      return unescapedPath.replace("file://", "");
+    }
+  }
+  return unescapedPath;
+}
+
+async function replaceMarkdownLocalImages(params: {
+  config: DingTalkConfig;
+  text: string;
+  log?: Logger;
+  mediaLocalRoots?: string[];
+}): Promise<string> {
+  const matches = [...params.text.matchAll(MARKDOWN_LOCAL_IMAGE_RE)];
+  if (matches.length === 0) {
+    return params.text;
+  }
+
+  let result = params.text;
+  for (const match of matches) {
+    const [fullMatch, altText, rawPath] = match;
+    const mediaPath = decodeMarkdownLocalImagePath(rawPath);
+    const uploadResult = await uploadMedia(params.config, mediaPath, "image", params.log, {
+      mediaLocalRoots: params.mediaLocalRoots,
+    });
+
+    if (!uploadResult?.mediaId) {
+      params.log?.warn?.(
+        `[DingTalk] Markdown local image upload failed, keep original reference: ${mediaPath}`,
+      );
+      continue;
+    }
+
+    result = result.replace(fullMatch, () => `![${altText}](${uploadResult.mediaId})`);
+  }
+
+  return result;
+}
 
 type ProactiveTextSendResult = AxiosResponse | { tracking: DingTalkTrackingMetadata };
 
@@ -78,6 +129,9 @@ function persistOutboundMessageContext(params: {
   createdAt?: number;
   quotedRef?: QuotedRef;
   log?: Logger;
+  senderId?: string;
+  senderName?: string;
+  chatType?: "direct" | "group";
   delivery: {
     messageId?: string;
     processQueryKey?: string;
@@ -101,6 +155,9 @@ function persistOutboundMessageContext(params: {
     createdAt: params.createdAt ?? Date.now(),
     text: params.text,
     messageType: params.messageType,
+    senderId: params.senderId,
+    senderName: params.senderName,
+    chatType: params.chatType,
     ttlMs: DEFAULT_MESSAGE_CONTEXT_TTL_DAYS * 24 * 60 * 60 * 1000,
     topic: null,
     quotedRef: params.quotedRef,
@@ -116,26 +173,6 @@ function buildPersistedOutboundText(text: string, options: SendMessageOptions): 
     return `[media:${options.mediaType}] ${options.mediaPath}`;
   }
   return text;
-}
-
-function composeCardContentForAppend(previous: string | undefined, incoming: string): string {
-  const prev = previous ?? "";
-  if (!prev) {
-    return incoming;
-  }
-  if (!incoming) {
-    return prev;
-  }
-  if (incoming.startsWith(prev)) {
-    return incoming;
-  }
-  if (prev.endsWith(incoming)) {
-    return prev;
-  }
-  if (prev.endsWith("\n") || incoming.startsWith("\n")) {
-    return `${prev}${incoming}`;
-  }
-  return `${prev}${incoming}`;
 }
 
 const DINGTALK_TEXT_CHUNK_LIMIT = 3800;
@@ -175,6 +212,14 @@ function extractErrorCodeFromResponseData(data: unknown): string | null {
   }
 
   const payload = data as Record<string, unknown>;
+  const errcode = payload.errcode;
+  if (typeof errcode === "number" && Number.isFinite(errcode)) {
+    return String(errcode);
+  }
+  if (typeof errcode === "string" && errcode.trim()) {
+    return errcode.trim();
+  }
+
   const code = payload.code;
   if (typeof code === "string" && code.trim()) {
     return code.trim();
@@ -186,6 +231,62 @@ function extractErrorCodeFromResponseData(data: unknown): string | null {
   }
 
   return null;
+}
+
+function summarizeSessionWebhookResponse(data: unknown): string {
+  if (!data || typeof data !== "object") {
+    return `type=${typeof data}`;
+  }
+  const payload = data as Record<string, unknown>;
+  const code = extractErrorCodeFromResponseData(payload) || "(none)";
+  const message = firstTrimmedString(
+    payload.message,
+    payload.errmsg,
+    payload.msg,
+    payload.errorMessage,
+  ) || "(none)";
+  const success =
+    typeof payload.success === "boolean"
+      ? String(payload.success)
+      : typeof payload.result === "boolean"
+        ? String(payload.result)
+        : "(none)";
+  const delivery = extractOutboundDeliveryMetadata(payload);
+  return (
+    `success=${success} code=${code} message=${message} ` +
+    `messageId=${delivery.messageId || "(none)"} ` +
+    `processQueryKey=${delivery.processQueryKey || "(none)"} ` +
+    `outTrackId=${delivery.outTrackId || "(none)"}`
+  );
+}
+
+function ensureSessionWebhookBusinessSuccess(
+  data: unknown,
+  context: { msgtype: string },
+): void {
+  if (!data || typeof data !== "object") {
+    return;
+  }
+  const payload = data as Record<string, unknown>;
+  const code = extractErrorCodeFromResponseData(payload);
+  const message = firstTrimmedString(
+    payload.message,
+    payload.errmsg,
+    payload.msg,
+    payload.errorMessage,
+  ) || "unknown error";
+
+  const hasFailureSuccessFlag = payload.success === false || payload.result === false;
+  const hasFailureCode = typeof code === "string" && code !== "" && code !== "0";
+  if (!hasFailureSuccessFlag && !hasFailureCode) {
+    return;
+  }
+
+  const reason = [
+    code && code !== "0" ? `code=${code}` : "",
+    message !== "unknown error" ? `message=${message}` : "",
+  ].filter(Boolean).join(" ");
+  throw new Error(`Session webhook ${context.msgtype} send failed${reason ? `: ${reason}` : ""}`);
 }
 
 function isProactivePermissionOrScopeError(code: string | null): boolean {
@@ -209,8 +310,9 @@ export async function uploadMedia(
   mediaPath: string,
   mediaType: "image" | "voice" | "video" | "file",
   log?: Logger,
-): Promise<string | null> {
-  return uploadMediaUtil(config, mediaPath, mediaType, getAccessToken, log);
+  options?: { mediaLocalRoots?: string[] },
+): Promise<UploadMediaResult | null> {
+  return uploadMediaUtil(config, mediaPath, mediaType, getAccessToken, log, options);
 }
 
 export async function sendProactiveTextOrMarkdown(
@@ -234,7 +336,7 @@ export async function sendProactiveTextOrMarkdown(
 
   // In card mode, use card API to avoid oToMessages/batchSend permission requirement.
   const messageType = config.messageType || "markdown";
-  if (messageType === "card" && config.cardTemplateId && !options.forceMarkdown) {
+  if (messageType === "card" && !options.forceMarkdown) {
     log?.debug?.(
       `[DingTalk] Using card API for proactive message to user ${resolvedTarget}${proactiveRiskTag}`,
     );
@@ -261,7 +363,16 @@ export async function sendProactiveTextOrMarkdown(
     ? "https://api.dingtalk.com/v1.0/robot/groupMessages/send"
     : "https://api.dingtalk.com/v1.0/robot/oToMessages/batchSend";
 
-  const normalizedText = config.convertMarkdownTables !== false ? convertMarkdownTablesToPlainText(text) : text;
+  const textWithUploadedLocalImages = await replaceMarkdownLocalImages({
+    config,
+    text,
+    log,
+    mediaLocalRoots: options.mediaLocalRoots,
+  });
+  const normalizedText =
+    config.convertMarkdownTables !== false
+      ? convertMarkdownTablesToPlainText(textWithUploadedLocalImages)
+      : textWithUploadedLocalImages;
   const { useMarkdown, title } = detectMarkdownAndExtractTitle(normalizedText, options, "OpenClaw 提醒");
 
   log?.debug?.(
@@ -275,7 +386,7 @@ export async function sendProactiveTextOrMarkdown(
     : JSON.stringify({ content: normalizedText });
 
   const payload: ProactiveMessagePayload = {
-    robotCode: config.robotCode || config.clientId,
+    robotCode: resolveRobotCode(config),
     msgKey,
     msgParam,
   };
@@ -347,10 +458,13 @@ export async function sendProactiveMedia(
 
   try {
     // Upload first, then send by media_id.
-    const mediaId = await uploadMedia(config, mediaPath, mediaType, log);
-    if (!mediaId) {
+    const uploadResult = await uploadMedia(config, mediaPath, mediaType, log, {
+      mediaLocalRoots: options.mediaLocalRoots,
+    });
+    if (!uploadResult) {
       return { ok: false, error: "Failed to upload media" };
     }
+    const { mediaId, buffer, durationMs: uploadedDurationMs } = uploadResult;
 
     const token = await getAccessToken(config, log);
     const { targetId, isExplicitUser } = stripTargetPrefix(target);
@@ -371,7 +485,8 @@ export async function sendProactiveMedia(
       msgParam = JSON.stringify({ photoURL: mediaId });
     } else if (mediaType === "voice") {
       msgKey = "sampleAudio";
-      const durationMs = await getVoiceDurationMs(mediaPath, mediaType, log);
+      const durationMs = uploadedDurationMs
+        ?? await getVoiceDurationMs(mediaPath, mediaType, log, { preReadBuffer: buffer });
       msgParam = JSON.stringify({ mediaId, duration: String(durationMs) });
     } else {
       // sampleVideo requires picMediaId; fallback to sampleFile for broader compatibility.
@@ -383,7 +498,7 @@ export async function sendProactiveMedia(
     }
 
     const payload: ProactiveMessagePayload = {
-      robotCode: config.robotCode || config.clientId,
+      robotCode: resolveRobotCode(config),
       msgKey,
       msgParam,
     };
@@ -419,6 +534,8 @@ export async function sendProactiveMedia(
       messageType: "outbound-proactive-media",
       quotedRef: options.quotedRef,
       log,
+      ...DEFAULT_OUTBOUND_SENDER,
+      chatType: inferConversationChatType(options.conversationId || resolvedTarget),
       delivery: {
         ...delivery,
         kind: "proactive-media",
@@ -477,6 +594,8 @@ export async function sendProactiveMedia(
       messageType: "outbound-proactive-fallback",
       quotedRef: options.quotedRef,
       log,
+      ...DEFAULT_OUTBOUND_SENDER,
+      chatType: inferConversationChatType(options.conversationId || normalizedTarget),
       delivery: {
         ...fallbackDelivery,
         kind: isTrackingResult(fallback as ProactiveTextSendResult) ? "proactive-card" : "proactive-text",
@@ -497,15 +616,22 @@ export async function sendBySession(
 
   // Session webhook supports native media messages; prefer that when media info is available.
   if (options.mediaPath && options.mediaType) {
-    const mediaId = await uploadMedia(config, options.mediaPath, options.mediaType, log);
-    if (mediaId) {
+    const uploadResult = await uploadMedia(config, options.mediaPath, options.mediaType, log, {
+      mediaLocalRoots: options.mediaLocalRoots,
+    });
+    if (uploadResult) {
+      const { mediaId, buffer, durationMs: uploadedDurationMs } = uploadResult;
       let body: any;
 
       if (options.mediaType === "image") {
         body = { msgtype: "image", image: { media_id: mediaId } };
       } else if (options.mediaType === "voice") {
-        const durationMs = await getVoiceDurationMs(options.mediaPath, options.mediaType, log);
+        const durationMs = uploadedDurationMs
+          ?? await getVoiceDurationMs(options.mediaPath, options.mediaType, log, { preReadBuffer: buffer });
         body = { msgtype: "voice", voice: { media_id: mediaId, duration: String(durationMs) } };
+        log?.debug?.(
+          `[DingTalk] Sending session voice message mediaId=${mediaId} durationMs=${durationMs}`,
+        );
       } else if (options.mediaType === "video") {
         body = { msgtype: "video", video: { media_id: mediaId } };
       } else if (options.mediaType === "file") {
@@ -520,6 +646,17 @@ export async function sendBySession(
           headers: { "x-acs-dingtalk-access-token": token, "Content-Type": "application/json" },
           ...getProxyBypassOption(config),
         });
+        log?.debug?.(
+          `[DingTalk] Session webhook response msgtype=${body.msgtype} ${summarizeSessionWebhookResponse(result.data)}`,
+        );
+        ensureSessionWebhookBusinessSuccess(result.data, { msgtype: body.msgtype });
+        const delivery = extractOutboundDeliveryMetadata(result.data);
+        if (!delivery.messageId && !delivery.processQueryKey && !delivery.outTrackId) {
+          log?.warn?.(
+            `[DingTalk] Session webhook ${body.msgtype} response missing delivery metadata; ` +
+            summarizeSessionWebhookResponse(result.data),
+          );
+        }
         return result.data;
       }
     } else {
@@ -530,7 +667,16 @@ export async function sendBySession(
   }
 
   // Fallback to text/markdown reply payload.
-  const normalizedText = config.convertMarkdownTables !== false ? convertMarkdownTablesToPlainText(text) : text;
+  const textWithUploadedLocalImages = await replaceMarkdownLocalImages({
+    config,
+    text,
+    log,
+    mediaLocalRoots: options.mediaLocalRoots,
+  });
+  const normalizedText =
+    config.convertMarkdownTables !== false
+      ? convertMarkdownTablesToPlainText(textWithUploadedLocalImages)
+      : textWithUploadedLocalImages;
   const { useMarkdown, title } = detectMarkdownAndExtractTitle(normalizedText, options, "Clawdbot 消息");
   const chunks = splitMarkdownChunks(normalizedText, DINGTALK_TEXT_CHUNK_LIMIT);
 
@@ -558,6 +704,10 @@ export async function sendBySession(
       headers: { "x-acs-dingtalk-access-token": token, "Content-Type": "application/json" },
       ...getProxyBypassOption(config),
     });
+    log?.debug?.(
+      `[DingTalk] Session webhook response msgtype=${body.msgtype} ${summarizeSessionWebhookResponse(result.data)}`,
+    );
+    ensureSessionWebhookBusinessSuccess(result.data, { msgtype: body.msgtype });
     lastResult = result.data;
   }
   return lastResult;
@@ -581,32 +731,41 @@ export async function sendMessage(
           return { ok: true };
         }
 
-        if (config.cardTemplateId) {
-          const proactiveResult = await sendProactiveCardText(config, conversationId, text, log);
-          if (!proactiveResult.ok) {
-            return { ok: false, error: proactiveResult.error || "Card send failed" };
-          }
-          return {
-            ok: true,
-            tracking: {
-              processQueryKey: proactiveResult.processQueryKey,
-              outTrackId: proactiveResult.outTrackId,
-              cardInstanceId: proactiveResult.cardInstanceId,
-            },
-          };
+        const proactiveResult = await sendProactiveCardText(config, conversationId, text, log);
+        if (!proactiveResult.ok) {
+          return { ok: false, error: proactiveResult.error || "Card send failed" };
         }
-      } else if (options.cardUpdateMode === "append") {
-        try {
-          const nextContent = composeCardContentForAppend(card.lastStreamedContent, text);
-          await streamAICard(card, nextContent, false, log);
-          return { ok: true };
-        } catch (err: any) {
-          log?.warn?.(`[DingTalk] AI Card streaming failed: ${err.message}`);
-          card.state = AICardStatus.FAILED;
-          card.lastUpdated = Date.now();
-          return { ok: false, error: err.message };
-        }
+        return {
+          ok: true,
+          tracking: {
+            processQueryKey: proactiveResult.processQueryKey,
+            outTrackId: proactiveResult.outTrackId,
+            cardInstanceId: proactiveResult.cardInstanceId,
+          },
+        };
       }
+    }
+
+    if (options.sessionWebhook && options.mediaPath && options.mediaType === "voice") {
+      log?.debug?.(
+        "[DingTalk] Session webhook does not support voice replies reliably; " +
+        "using proactive media API for this voice response",
+      );
+      const proactiveVoiceResult = await sendProactiveMedia(
+        config,
+        conversationId,
+        options.mediaPath,
+        options.mediaType,
+        options,
+      );
+      if (!proactiveVoiceResult.ok) {
+        return { ok: false, error: proactiveVoiceResult.error || "Voice reply send failed" };
+      }
+      return {
+        ok: true,
+        data: proactiveVoiceResult.data,
+        messageId: proactiveVoiceResult.messageId,
+      };
     }
 
     if (options.sessionWebhook) {
@@ -622,6 +781,8 @@ export async function sendMessage(
         messageType: options.mediaPath && options.mediaType ? "outbound-media" : "outbound",
         quotedRef: options.quotedRef,
         log,
+        ...DEFAULT_OUTBOUND_SENDER,
+        chatType: inferConversationChatType(options.conversationId || conversationId),
         delivery: {
           ...delivery,
           kind: "session",
@@ -641,6 +802,8 @@ export async function sendMessage(
       messageType: "outbound-proactive",
       quotedRef: options.quotedRef,
       log,
+      ...DEFAULT_OUTBOUND_SENDER,
+      chatType: inferConversationChatType(options.conversationId || conversationId),
       delivery: {
         ...delivery,
         kind: isTrackingResult(result) ? "proactive-card" : "proactive-text",

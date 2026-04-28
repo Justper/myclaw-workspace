@@ -1,10 +1,10 @@
 import http from "node:http";
 import https from "node:https";
-import axios from "axios";
-import { getAccessToken } from "./auth";
-import { getDingTalkRuntime } from "./runtime";
-import type { DingTalkConfig, Logger, MediaFile } from "./types";
-import { formatDingTalkErrorPayload, formatDingTalkErrorPayloadLog } from "./utils";
+import axios from "../http-client";
+import { getAccessToken } from "../auth";
+import { getDingTalkRuntime } from "../runtime";
+import type { DingTalkConfig, Logger, MediaFile } from "../types";
+import { formatDingTalkErrorPayload, formatDingTalkErrorPayloadLog } from "../utils";
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -229,6 +229,7 @@ export async function downloadGroupFile(
     dentryId: string,
     unionId: string,
     log?: Logger,
+    originalFilename?: string,
 ): Promise<MediaFile | null> {
     const rt = getDingTalkRuntime();
     const token = await getAccessToken(config, log);
@@ -294,9 +295,13 @@ export async function downloadGroupFile(
         const maxBytes =
             config.mediaMaxMb && config.mediaMaxMb > 0 ? config.mediaMaxMb * 1024 * 1024 : undefined;
         try {
-            const saved = maxBytes
-                ? await rt.channel.media.saveMediaBuffer(buffer, contentType, "inbound", maxBytes)
-                : await rt.channel.media.saveMediaBuffer(buffer, contentType, "inbound");
+            const saved = await rt.channel.media.saveMediaBuffer(
+                buffer,
+                contentType,
+                "inbound",
+                maxBytes,
+                originalFilename,
+            );
 
             return { path: saved.path, mimeType: saved.contentType ?? contentType };
         } catch (err: unknown) {
@@ -353,7 +358,7 @@ export async function resolveQuotedFile(
         }
 
         stage = "download-file";
-        const media = await downloadGroupFile(config, spaceId, match.dentryId, unionId, log);
+        const media = await downloadGroupFile(config, spaceId, match.dentryId, unionId, log, match.name);
         if (!media) {
             return null;
         }
